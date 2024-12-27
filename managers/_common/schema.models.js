@@ -16,11 +16,18 @@ module.exports = {
         path: 'password',
         type: 'string',
         length: {min: 8, max: 100},
+        rules: [
+            { regex: /[A-Z]/, error: 'Password must contain at least one uppercase letter.' },
+            { regex: /[a-z]/, error: 'Password must contain at least one lowercase letter.' },
+            { regex: /\d/, error: 'Password must contain at least one digit.' },
+            { regex: /[@#$!%*?&]/, error: 'Password must contain at least one special character.' },
+        ]
     },
     email: {
         path: 'email',
         type: 'string',
         length: {min:3, max: 100},
+        regex: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     },
     title: {
         path: 'title',
@@ -81,10 +88,6 @@ module.exports = {
         type: 'String',
         length: 13,
     },
-    email: {
-        type: 'String',
-        regex: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-    },
     number: {
         type: 'Number',
         length: {min: 1, max:6},
@@ -101,5 +104,10 @@ module.exports = {
     },
     bool: {
         type: 'Boolean',
+    },
+    role: {
+        path: 'role',
+        type: 'String',
+        length: {min: 3, max:30},
     },
 }

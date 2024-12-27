@@ -134,6 +134,16 @@ const isChance = (max)=>{
     return min == value; 
 }
 
+const validateUniqueFields = async (model, fields) => {
+    for (const [field, value] of Object.entries(fields)) {
+        const existingRecord = await model.findOne({ [field]: value });
+        if (existingRecord) {
+            return { error: `User with this ${field} already exists` };
+        }
+    }
+    return null;
+}
+
 module.exports = {
   slugify,
   getDeepValue,
@@ -147,5 +157,5 @@ module.exports = {
   hrTime,
   match,
   isChance,
-
+  validateUniqueFields
 }

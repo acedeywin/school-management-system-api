@@ -23,7 +23,6 @@ const cortex = new Cortex({
 });
 
 
-
 const managersLoader = new ManagersLoader({config, cache, cortex});
 const managers = managersLoader.load();
 

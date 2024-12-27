@@ -2,6 +2,11 @@ const mongoose      = require('mongoose');
 mongoose.Promise    = global.Promise;
 
 module.exports = ({uri})=>{
+
+  if (uri) {
+    console.error('MongoDB connection is not initialized.');
+}
+
   //database connection
   mongoose.connect(uri, {
     useNewUrlParser: true,

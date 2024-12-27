@@ -2,6 +2,7 @@ const http              = require('http');
 const express           = require('express');
 const cors              = require('cors');
 const app               = express();
+const routes            = require('../../routes/index')
 
 module.exports = class UserServer {
     constructor({config, managers}){
@@ -20,6 +21,8 @@ module.exports = class UserServer {
         app.use(express.json());
         app.use(express.urlencoded({ extended: true}));
         app.use('/static', express.static('public'));
+        //Expose routes
+        app.use("/api/v1", routes);
 
         /** an error handler */
         app.use((err, req, res, next) => {

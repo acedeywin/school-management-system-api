@@ -4,13 +4,25 @@ const md5        = require('md5');
 
 
 module.exports = class TokenManager {
+    constructor({config, cache}){
 
-    constructor({config}){
+        // if (!cache) throw new Error('Redis client is missing');
+
         this.config              = config;
         this.longTokenExpiresIn  = '3y';
         this.shortTokenExpiresIn = '1y';
+        this.userExposed         = ['v1_createShortToken']; // exposed functions
+        this.cache               = cache;
 
-        this.httpExposed         = ['v1_createShortToken'];
+        // Wrapping Redis commands using utility functions
+        this.setAsync = async ({ key, data, ttl }) =>
+            await this.cache.key.set({ key, data, ttl });
+
+        this.getAsync = async (key) => 
+            await this.cache.key.get({ key });
+
+        this.deleteAsync = async (key) => 
+            await this.cache.key.delete({ key });
     }
 
     /** 
@@ -55,17 +67,19 @@ module.exports = class TokenManager {
     verifyLongToken({token}){
         return this._verifyToken({token, secret: this.config.dotEnv.LONG_TOKEN_SECRET,})
     }
+    
     verifyShortToken({token}){
         return this._verifyToken({token, secret: this.config.dotEnv.SHORT_TOKEN_SECRET,})
     }
 
-
     /** generate shortId based on a longId */
     v1_createShortToken({__longToken, __device}){
+        const token = __longToken;
+        if(!token)return {error: 'missing token '};
+        console.log('found token', token);
 
-
-        let decoded = __longToken;
-        console.log(decoded);
+        let decoded = this.verifyLongToken({ token });
+        if(!decoded){ return {error: 'invalid'} };
         
         let shortToken = this.genShortToken({
             userId: decoded.userId, 
@@ -74,6 +88,22 @@ module.exports = class TokenManager {
             deviceId: md5(__device),
         });
 
-        return { shortToken };
+        return shortToken;
+    }
+
+    async addToBlacklist(token, expiresIn) {
+        const decoded = jwt.decode(token);
+        if (!decoded) {
+            throw new Error('Invalid token');
+        }
+
+        const ttl = expiresIn || (decoded.exp - Math.floor(Date.now() / 1000));
+        await this.setAsync({ key: `blacklist:${token}`, data: 'true', ttl });
+    }
+
+    async isBlacklisted(token) {
+        const result = await this.getAsync(`blacklist:${token}`);
+
+        return Boolean(result);
     }
 }
