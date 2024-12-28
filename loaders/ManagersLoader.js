@@ -36,7 +36,7 @@ module.exports = class ManagersLoader {
             aeon,
             managers: this.managers, 
             validators: this.validators,
-            // mongomodels: this.mongomodels,
+            // mongoModels: this.mongoModels,
             resourceNodes: this.resourceNodes,
         };
         
@@ -52,7 +52,7 @@ module.exports = class ManagersLoader {
 
         this.validators           = validatorsLoader.load();
         this.resourceNodes        = resourceMeshLoader.load();
-        this.mongomodels          = mongoLoader.load();
+        this.mongoModels          = mongoLoader.load();
 
     }
 

@@ -6,11 +6,26 @@ module.exports = {
         type: "string",
         length: { min: 1, max: 50 },
     },
+    identifier: {
+        path: 'identifier',
+        type: 'string',
+        length: {min: 3, max: 100},
+    },
     username: {
         path: 'username',
         type: 'string',
         length: {min: 3, max: 20},
         custom: 'username',
+    },
+    name: {
+        path: 'name',
+        type: 'string',
+        length: {min: 3, max: 100},
+    },
+    administrators: {
+        path: 'administrators',
+        type: 'array',
+        length: {min: 1, max: 10},
     },
     password: {
         path: 'password',
@@ -28,6 +43,12 @@ module.exports = {
         type: 'string',
         length: {min:3, max: 100},
         regex: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    },
+    website: {
+        path: 'website',
+        type: 'string',
+        length: {min:3, max: 100},
+        regex: /^(https?:\/\/)?([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,})([\/\w.-]*)*\/?$/
     },
     title: {
         path: 'title',
@@ -54,6 +75,11 @@ module.exports = {
         type: 'string',
         length: {min: 9, max: 300},
     },
+    address: {
+        path: 'address',
+        type: 'string',
+        length: {min: 9, max: 300},
+    },
     emoji: {
         path: 'emoji',
         type: 'Array',
@@ -74,19 +100,21 @@ module.exports = {
     },
     text: {
         type: 'String',
-        length: {min: 3, max:15},
+        length: {min: 3, max: 15 },
     },
     longText: {
         type: 'String',
-        length: {min: 3, max:250},
+        length: {min: 3, max: 250 },
     },
     paragraph: {
         type: 'String',
         length: {min: 3, max:10000},
     },
-    phone: {
-        type: 'String',
-        length: 13,
+    phoneNumber: {
+        path: 'phoneNumber',
+        type: 'string',
+        length: {min: 10, max: 14},
+        regex: /^\+?(\d{1,3})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/
     },
     number: {
         type: 'Number',

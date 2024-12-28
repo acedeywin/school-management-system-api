@@ -6,7 +6,7 @@ module.exports = class AuthController {
     async login(req, res, next){
         try {
             const { identifier, password } = req.body
-            const deviceInfo = req.headers['user-agent'];
+            const deviceInfo = req.device;
 
             const result = await this.authManager.login({ identifier, password, deviceInfo })
 
@@ -19,12 +19,12 @@ module.exports = class AuthController {
             return res.status(201).json(result);
             
         } catch (error) {
-            console.error('error', error);
-            next(error)
+            // next()
+            return res.status(403).json({ error }) 
         }
     }
 
-    async logout(req, res, next){
+    async logout(req, res){
         try {
 
             const { token } = req.query
@@ -40,8 +40,7 @@ module.exports = class AuthController {
             return res.status(201).json(result);
           
         } catch (error) {
-            console.error('error', error);
-            next(error) 
+            return res.status(403).json({ error })  
         }
     }
 }

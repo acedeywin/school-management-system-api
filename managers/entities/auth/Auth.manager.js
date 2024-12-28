@@ -2,39 +2,47 @@ const bcrypt = require('bcrypt');
 const jwt        = require('jsonwebtoken');
 
 module.exports = class Auth {
-    constructor({ config, managers, mongomodels } = {}) {
+    constructor({ config, managers, userModels, roleModels } = {}) {
         this.config = config;
-        this.mongomodels = mongomodels;
+        this.userModels = userModels;
+        this.roleModels = roleModels;
         this.tokenManager = managers.token;
         this.authsCollection = "Auths";
         this.authExposed = ['login', 'logout'];
     }
 
     async login({ identifier, password, deviceInfo }) {
-        if (!this.mongomodels.user) {
-            throw new Error('User model is not loaded');
+        const user = this.userModels.user;
+        const roles = await this.roleModels.role;
+        if (!user) {
+            return {error: 'User model is not loaded'};
         }
 
         const error = 'Invalid email or password.'
 
         // Find the user by email or username
-        const user = await this.mongomodels.user.findOne({
+        const isUser = await user.findOne({
             $or: [{ email: identifier }, { username: identifier }],
         });
-        if (!user) {
+
+        if (!isUser) {
             return { error };
         }
 
+        const { _id, username, email, role, password: hashedPassword } = isUser
+
         // Compare passwords
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, hashedPassword);
         if (!isMatch) {
             return { error };
         }
 
-        // Generate long token
+        const { permission } = await roles.findOne({ _id: role })
+
+        // // Generate long token
         const longToken = this.tokenManager.genLongToken({
-            userId: user._id,
-            userKey: user.role,
+            userId: _id,
+            userKey: permission,
         });
 
 
@@ -47,24 +55,18 @@ module.exports = class Auth {
 
         return {
             success: true,
+            message: 'Logged in successfully.',
             user: {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role,
+                id: _id,
+                username,
+                email,
+                role: permission,
             },
-            tokens: {
-                longToken,
-                shortToken,
-            },
+            tokens: shortToken,
         };
     }
 
-    async logout({ token }) {
-        if (!token) {
-            throw new Error('Token is required for logout');
-        }
-    
+    async logout({ token }) {    
         // Add the token to the blacklist
         const decoded = jwt.decode(token);
         if (!decoded) {
@@ -81,18 +83,5 @@ module.exports = class Auth {
         await this.tokenManager.addToBlacklist(token, expiresIn);
     
         return { success: true, message: 'Logged out successfully.' };
-    }
-
-    async authenticate({ token, isShortToken = false }) {
-        const secret = isShortToken
-            ? this.config.dotEnv.SHORT_TOKEN_SECRET
-            : this.config.dotEnv.LONG_TOKEN_SECRET;
-    
-        try {
-            const decoded = await this.tokenManager.verifyToken({ token, secret, isShortToken });
-            return { success: true, user: decoded };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
     }
 }

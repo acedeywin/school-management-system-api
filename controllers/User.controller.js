@@ -3,7 +3,7 @@ module.exports = class UserController {
         this.userManager = userManager;
     }
 
-    async createUser(req, res, next) {
+    async createUser(req, res) {
         try {
             const { username, email, password, role } = req.body;
 
@@ -18,11 +18,27 @@ module.exports = class UserController {
             // Successful creation
             return res.status(201).json(result);
         } catch (error) {
-            console.error('error', error);
-            next(error)
+            return res.status(403).json({ error }) 
+        }
+    }
 
-            // Return internal server error
-            // return res.status(500).json({ error: error.message });
+    async createSuperadmin(req, res){
+        try {
+            const { username, email, password } = req.body;
+
+            // Call to userManager to create a user
+            const result = await this.userManager.createSuperadmin({ username, email, password });
+
+             // Check for errors in the result
+             if (result.error) {
+                return res.status(400).json({ success: false, error: result.error });
+            }
+
+            // Successful creation
+            return res.status(201).json(result);
+            
+        } catch (error) {
+            return res.status(403).json({ error }) 
         }
     }
 };

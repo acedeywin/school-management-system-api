@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const slugify = (text)=>{
   const from = "ãàáäâẽèéëêìíïîõòóöôùúüûñç·/_,:;"
   const to = "aaaaaeeeeeiiiiooooouuuunc------"
@@ -134,14 +136,34 @@ const isChance = (max)=>{
     return min == value; 
 }
 
-const validateUniqueFields = async (model, fields) => {
+const validateUniqueFields = async (model, fields, entity) => {
     for (const [field, value] of Object.entries(fields)) {
         const existingRecord = await model.findOne({ [field]: value });
         if (existingRecord) {
-            return { error: `User with this ${field} already exists` };
+            return { error: `${entity} with this ${field} already exists` };
         }
     }
     return null;
+}
+
+const validateAdministrators = async (adminIds, mongoModels) => {
+    if (!Array.isArray(adminIds)) {
+        return { error:'Administrators must be an array of ObjectIds.' };
+    }
+
+    // Ensure all IDs are valid ObjectIds
+    const validObjectIds = adminIds.every(id => mongoose.Types.ObjectId.isValid(id));
+    if (!validObjectIds) {
+        return { error:'Administrators array contains invalid ObjectIds.' };
+    }
+
+    // Check if all provided IDs exist
+    const count = await mongoModels.countDocuments({ _id: { $in: adminIds } });
+    if (count !== adminIds.length) {
+        return { error:'Some administrators do not exist in the User collection.' };
+    }
+
+    return true;
 }
 
 module.exports = {
@@ -157,5 +179,6 @@ module.exports = {
   hrTime,
   match,
   isChance,
-  validateUniqueFields
+  validateUniqueFields,
+  validateAdministrators
 }

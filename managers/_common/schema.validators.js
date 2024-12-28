@@ -1,42 +1,57 @@
+const { BadRequestError, NotFoundError } = require('../../libs/errors');
 const schema = require('./schema.models');
 
-const validateCreateUser = (data, schemaKey) => {
+const validateCreate = (data, schemaKey) => {
     const rules = schema[schemaKey];
 
     if (!rules) {
-        throw new Error(`No validation rules defined for ${schemaKey}`);
+        throw new NotFoundError(`No validation rules defined for ${schemaKey}`);
     }
 
-    const value = data[rules.path];
+    const value = typeof rules.path === 'string' ? data[rules.path]?.trim?.() || data[rules.path] : data[rules.path];
 
-    if (typeof value !== rules.type.toLowerCase()) {
-        return { valid: false, error: `${rules.path} should be of type ${rules.type}` };
+    // Validate type
+    const expectedType = rules.type.toLowerCase();
+    const actualType = Array.isArray(value) ? 'array' : typeof value;
+
+    if (value && expectedType !== actualType) {
+        throw new BadRequestError(`${rules.path} should be of type ${rules.type}`);
     }
 
+    // Validate length for strings, arrays, and objects
     if (rules.length) {
-        if (value.length < rules.length.min || value.length > rules.length.max) {
-            return {
-                valid: false,
-                error: `${rules.path} should be between ${rules.length.min} and ${rules.length.max} characters`,
-            };
+        const valueLength = 
+            actualType === 'string' || Array.isArray(value)
+                ? value.length
+                : actualType === 'object'
+                ? Object.keys(value).length
+                : 0;
+
+        if (valueLength < rules.length.min || valueLength > rules.length.max) {
+            throw new BadRequestError(
+                `${rules.path} should be between ${rules.length.min} and ${rules.length.max} ${actualType === 'object' ? 'keys' : 'characters'}`
+            );
         }
     }
 
-    if (rules.regex && !rules.regex.test(value)) {
-        return { valid: false, error: `${rules.path} does not match the required pattern` };
+    // Validate regex for strings
+    if (rules.regex && actualType === 'string' && !rules.regex.test(value)) {
+        throw new BadRequestError(`${rules.path} does not match the required ${rules.path} pattern`);
     }
 
-   if(rules.rules){
-    const errors = rules.rules
-    .filter(rule => !rule.regex.test(value))
-    .map(rule => rule.error);
+    // Validate custom rules
+    if (rules.rules) {
+        const errors = rules.rules
+            .filter(rule => !rule.regex.test(value))
+            .map(rule => rule.error);
 
-    return errors.length > 0 
-        ? { valid: false, error: errors[0] }
-        : { valid: true, message: 'Password is valid' };
-   }
+        if (errors.length > 0) {
+            throw new BadRequestError(errors[0]);
+        }
+    }
 
     return { valid: true };
 };
 
-module.exports = { validateCreateUser };
+module.exports = { validateCreate };
+
