@@ -1,169 +1,172 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
-const slugify = (text)=>{
-  const from = "ãàáäâẽèéëêìíïîõòóöôùúüûñç·/_,:;"
-  const to = "aaaaaeeeeeiiiiooooouuuunc------"
+const slugify = (text) => {
+  const from = 'ãàáäâẽèéëêìíïîõòóöôùúüûñç·/_,:;'
+  const to = 'aaaaaeeeeeiiiiooooouuuunc------'
 
-  const newText = text.split('').map(
-    (letter, i) => letter.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i)))
+  const newText = text
+    .split('')
+    .map((letter, i) =>
+      letter.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i))
+    )
 
   return newText
-    .toString()                     // Cast to string
-    .toLowerCase()                  // Convert the string to lowercase letters
-    .trim()                         // Remove whitespace from both sides of a string
-    .replace(/\s+/g, '-')           // Replace spaces with -
-    .replace(/&/g, '-y-')           // Replace & with 'and'
-    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-    .replace(/\-\-+/g, '-');        // Replace multiple - with single -
-}
-
-
-/**
-* check if string can be parsed to positive valid number
-* @param {*} str 
-* @returns boolean
-*/
-const isNormalInteg = (str)=>{
-var n = Math.floor(Number(str));
-return n !== Infinity && String(n) === str && n >= 0;
+    .toString() // Cast to string
+    .toLowerCase() // Convert the string to lowercase letters
+    .trim() // Remove whitespace from both sides of a string
+    .replace(/\s+/g, '-') // Replace spaces with -
+    .replace(/&/g, '-y-') // Replace & with 'and'
+    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+    .replace(/\-\-+/g, '-') // Replace multiple - with single -
 }
 
 /**
-* 
-* @param {*} path 'a.b.c'
-* @param {*} obj an object to extract value of 
-*/
+ * check if string can be parsed to positive valid number
+ * @param {*} str
+ * @returns boolean
+ */
+const isNormalInteg = (str) => {
+  var n = Math.floor(Number(str))
+  return n !== Infinity && String(n) === str && n >= 0
+}
+
+/**
+ *
+ * @param {*} path 'a.b.c'
+ * @param {*} obj an object to extract value of
+ */
 const getDeepValue = (path, obj) => {
-for (var i = 0, path = path.split('.'), len = path.length; i < len; i++) {
-    var level = obj[path[i]];
-    if (!level) return null;
-    obj = level;
-};
-return obj;
+  for (var i = 0, path = path.split('.'), len = path.length; i < len; i++) {
+    var level = obj[path[i]]
+    if (!level) return null
+    obj = level
+  }
+  return obj
 }
 
 /**
-* @param {*} path example 'a.b.c'
-* @param {*} value what do you wanaa set at the path ex: 'hello'
-* @param {*} obj the object that will be injected the path and value
-*/
-const setDeepValue = ({path, value, obj, marker}) => {
-if(!marker)marker='.'
-let pfs = path.split(marker);
-let deepRef = obj;
+ * @param {*} path example 'a.b.c'
+ * @param {*} value what do you wanaa set at the path ex: 'hello'
+ * @param {*} obj the object that will be injected the path and value
+ */
+const setDeepValue = ({ path, value, obj, marker }) => {
+  if (!marker) marker = '.'
+  let pfs = path.split(marker)
+  let deepRef = obj
 
-for (let i = 0; i < pfs.length; i++) {
+  for (let i = 0; i < pfs.length; i++) {
     if (deepRef[pfs[i]] === undefined || deepRef[pfs[i]] === null) {
-        deepRef[pfs[i]] = {};
+      deepRef[pfs[i]] = {}
     }
     if (i == pfs.length - 1) {
-        deepRef[pfs[i]] = value;
+      deepRef[pfs[i]] = value
     } else {
-        deepRef = deepRef[pfs[i]];
+      deepRef = deepRef[pfs[i]]
     }
-}
-return obj;
-}
-
-const upCaseFirst = (string)=>{
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+  return obj
 }
 
-const nanoTime = ()=>{
-    return Number(process.hrtime.bigint())
+const upCaseFirst = (string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1)
 }
 
-const inverseObj = (obj)=>{
-    var retobj = {};
-    for(var key in obj){
-      retobj[obj[key]] = key;
-    }
-    return retobj;
+const nanoTime = () => {
+  return Number(process.hrtime.bigint())
 }
 
+const inverseObj = (obj) => {
+  var retobj = {}
+  for (var key in obj) {
+    retobj[obj[key]] = key
+  }
+  return retobj
+}
 
-const flattenObject =(ob, marker)=> {
-    if(!marker)marker=".";
-    var toReturn = {};
-    for (var i in ob) {
-        if (!ob.hasOwnProperty(i)) continue;
-        if ((typeof ob[i]) == 'object' && ob[i] !== null) {
-          if(Array.isArray(ob[i])){
-            toReturn[i] = ob[i];
-          } else {
-            var flatObject = flattenObject(ob[i], marker);
-            for (var x in flatObject) {
-                if (!flatObject.hasOwnProperty(x)) continue;
-                toReturn[i + marker + x] = flatObject[x];
-            }
-          }
-        } else {
-            toReturn[i] = ob[i];
+const flattenObject = (ob, marker) => {
+  if (!marker) marker = '.'
+  var toReturn = {}
+  for (var i in ob) {
+    if (!ob.hasOwnProperty(i)) continue
+    if (typeof ob[i] == 'object' && ob[i] !== null) {
+      if (Array.isArray(ob[i])) {
+        toReturn[i] = ob[i]
+      } else {
+        var flatObject = flattenObject(ob[i], marker)
+        for (var x in flatObject) {
+          if (!flatObject.hasOwnProperty(x)) continue
+          toReturn[i + marker + x] = flatObject[x]
         }
+      }
+    } else {
+      toReturn[i] = ob[i]
     }
-    return toReturn;
+  }
+  return toReturn
 }
 
-const arrayToObj = (arr)=>{
-    let keys = arr.filter((_, index) => index % 2 === 0);
-    let values = arr.filter((_, index) => index % 2 !== 0)
-    let obj = {};
-    keys.reduce((sighting, key, index) => {
-            obj[key] = values[index]
-            return obj
-    }, {});
-    return obj;
+const arrayToObj = (arr) => {
+  let keys = arr.filter((_, index) => index % 2 === 0)
+  let values = arr.filter((_, index) => index % 2 !== 0)
+  let obj = {}
+  keys.reduce((sighting, key, index) => {
+    obj[key] = values[index]
+    return obj
+  }, {})
+  return obj
 }
 
-const hrTime = ()=>{
-    return Number(process.hrtime.bigint());
+const hrTime = () => {
+  return Number(process.hrtime.bigint())
 }
 
 _regExpEscape = (s) => {
-    return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
-  }
+  return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
+}
 _wildcardToRegExp = (s) => {
-    return new RegExp('^' + s.split(/\*+/).map(_regExpEscape).join('.*') + '$');
+  return new RegExp('^' + s.split(/\*+/).map(_regExpEscape).join('.*') + '$')
 }
 
 const match = (str, model) => {
-    return _wildcardToRegExp(model).test(str);
+  return _wildcardToRegExp(model).test(str)
 }
 
-const isChance = (max)=>{
-    let min = 0;
-    let value = Math.floor(Math.random() * (max - min + 1) + min);
-    return min == value; 
+const isChance = (max) => {
+  let min = 0
+  let value = Math.floor(Math.random() * (max - min + 1) + min)
+  return min == value
 }
 
 const validateUniqueFields = async (model, fields, entity) => {
-    for (const [field, value] of Object.entries(fields)) {
-        const existingRecord = await model.findOne({ [field]: value });
-        if (existingRecord) {
-            return { error: `${entity} with this ${field} already exists` };
-        }
+  for (const [field, value] of Object.entries(fields)) {
+    const existingRecord = await model.findOne({ [field]: value })
+    if (existingRecord) {
+      return { error: `${entity} with this ${field} already exists` }
     }
-    return null;
+  }
+  return null
 }
 
 const validateAdministrators = async (adminIds, mongoModels) => {
-    if (!Array.isArray(adminIds)) {
-        return { error:'Administrators must be an array of ObjectIds.' };
-    }
+  if (!Array.isArray(adminIds)) {
+    return { error: 'Administrators must be an array of ObjectIds.' }
+  }
 
-    // Ensure all IDs are valid ObjectIds
-    const validObjectIds = adminIds.every(id => mongoose.Types.ObjectId.isValid(id));
-    if (!validObjectIds) {
-        return { error:'Administrators array contains invalid ObjectIds.' };
-    }
+  // Ensure all IDs are valid ObjectIds
+  const validObjectIds = adminIds.every((id) =>
+    mongoose.Types.ObjectId.isValid(id)
+  )
+  if (!validObjectIds) {
+    return { error: 'Administrators array contains invalid ObjectIds.' }
+  }
 
-    // Check if all provided IDs exist
-    const count = await mongoModels.countDocuments({ _id: { $in: adminIds } });
-    if (count !== adminIds.length) {
-        return { error:'Some administrators do not exist in the User collection.' };
-    }
+  // Check if all provided IDs exist
+  const count = await mongoModels.countDocuments({ _id: { $in: adminIds } })
+  if (count !== adminIds.length) {
+    return { error: 'Some administrators do not exist in the User collection.' }
+  }
 
-    return true;
+  return true
 }
 
 module.exports = {
