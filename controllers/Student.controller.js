@@ -1,18 +1,22 @@
-module.exports = class UserController {
-  constructor({ userManager }) {
-    this.userManager = userManager
+module.exports = class StudentController {
+  constructor({ studentManager }) {
+    this.studentManager = studentManager
   }
 
-  async createUser(req, res) {
+  async enrollStudent(req, res) {
     try {
-      const { username, email, password, role } = req.body
+      const { firstName, lastName, email, phoneNumber, dateOfBirth } = req.body
 
-      // Call to userManager to create a user
-      const result = await this.userManager.createUser({
-        username,
+      const { schoolId, classroomId } = req.query
+
+      const result = await this.studentManager.enrollStudent({
+        firstName,
+        lastName,
         email,
-        password,
-        role
+        phoneNumber,
+        dateOfBirth,
+        schoolId,
+        classroomId
       })
 
       // Check for errors in the result
@@ -27,18 +31,18 @@ module.exports = class UserController {
     }
   }
 
-  async createSuperadmin(req, res) {
+  async transferStudent(req, res) {
     try {
-      const { username, email, password } = req.body
+      const { toSchool, toClassroom, transferDate } = req.body.transferHistory
+      const { studentId } = req.query
 
-      // Call to userManager to create a user
-      const result = await this.userManager.createSuperadmin({
-        username,
-        email,
-        password
+      const result = await this.studentManager.transferStudent({
+        toSchool,
+        toClassroom,
+        transferDate,
+        studentId
       })
 
-      // Check for errors in the result
       if (result.error) {
         return res.status(400).json({ success: false, errors: result.error })
       }
@@ -50,81 +54,81 @@ module.exports = class UserController {
     }
   }
 
-  async getUsers(req, res) {
+  async getStudents(req, res) {
     try {
-      const { page, limit } = req.query
-
-      const result = await this.userManager.getUsers({ page, limit })
-
-      // Check for errors in the result
-      if (result.error) {
-        return res.status(400).json({ success: false, errors: result.error })
-      }
-
-      // Successful creation
-      return res.status(201).json(result)
-    } catch (error) {
-      return res.status(403).json({ errors: error })
-    }
-  }
-
-  async getuserById(req, res) {
-    try {
-      const { userId } = req.query
-      const adminId = req.user.userId
-      const permission = req.user.userKey
-
-      const result = await this.userManager.getuserById({
-        adminId,
-        userId,
-        permission
-      })
-
-      // Check for errors in the result
-      if (result.error) {
-        return res.status(400).json({ success: false, errors: result.error })
-      }
-
-      // Successful creation
-      return res.status(201).json(result)
-    } catch (error) {
-      return res.status(403).json({ errors: error })
-    }
-  }
-
-  async updateUserProfile(req, res) {
-    try {
-      const { userId } = req.query
-      const adminId = req.user.userId
-      const permission = req.user.userKey
-
-      const result = await this.userManager.updateUserProfile({
-        adminId,
-        userId,
-        permission,
-        updates: req.body
-      })
-
-      // Check for errors in the result
-      if (result.error) {
-        return res.status(400).json({ success: false, errors: result.error })
-      }
-
-      // Successful creation
-      return res.status(201).json(result)
-    } catch (error) {
-      return res.status(403).json({ errors: error })
-    }
-  }
-
-  async deleteUserProfile(req, res) {
-    try {
-      const { userId } = req.query
+      const { schoolId, page = 1, limit = 10 } = req.query
       const adminId = req.user.userId
 
-      const result = await this.userManager.deleteUserProfile({
+      const result = await this.studentManager.getStudents({
         adminId,
-        userId
+        schoolId,
+        page,
+        limit
+      })
+
+      if (result.error) {
+        return res.status(400).json({ success: false, errors: result.error })
+      }
+
+      // Successful creation
+      return res.status(201).json(result)
+    } catch (error) {
+      return res.status(403).json({ errors: error })
+    }
+  }
+
+  async getStudentById(req, res) {
+    try {
+      const { studentId } = req.query
+
+      const adminId = req.user.userId
+
+      const result = await this.studentManager.getStudentById({
+        studentId,
+        adminId
+      })
+
+      if (result.error) {
+        return res.status(400).json({ success: false, errors: result.error })
+      }
+
+      // Successful creation
+      return res.status(201).json(result)
+    } catch (error) {
+      return res.status(403).json({ errors: error })
+    }
+  }
+
+  async updateStudent(req, res) {
+    try {
+      const { studentId } = req.query
+      const adminId = req.user.userId
+
+      const result = await this.studentManager.updateStudent({
+        studentId,
+        updates: req.body,
+        adminId
+      })
+
+      if (result.error) {
+        return res.status(400).json({ success: false, errors: result.error })
+      }
+
+      // Successful creation
+      return res.status(201).json(result)
+    } catch (error) {
+      return res.status(403).json({ errors: error })
+    }
+  }
+
+  async deleteStudent(req, res) {
+    try {
+      const { studentId } = req.query
+      const adminId = req.user.userId
+
+      const result = await this.studentManager.deleteStudent({
+        studentId,
+        adminId
       })
 
       if (result.error) {

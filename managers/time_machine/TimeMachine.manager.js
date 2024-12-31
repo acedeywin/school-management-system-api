@@ -42,7 +42,7 @@ module.exports = class TimeMachine {
           }
         },
         at: Date.now() + interval,
-        onError: {
+        onerrors: {
           method: 'emitToOneOf',
           args: { type: 'darbwali-axion', call: 'onError', data: '' }
         }
@@ -83,7 +83,7 @@ module.exports = class TimeMachine {
           }
         },
         at: Date.now() + interval,
-        onError: {
+        onerrors: {
           method: 'emitToOneOf',
           args: { type: 'darbwali-axion', call: 'onError', data: '' }
         }
@@ -128,7 +128,7 @@ module.exports = class TimeMachine {
       let result = await this[`${fnName}`](data)
       cb(result)
     } else {
-      cb({ error: `${fnName} is not executable` })
+      cb({ errors: `${fnName} is not executable` })
     }
   }
 }

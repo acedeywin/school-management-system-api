@@ -141,7 +141,7 @@ const validateUniqueFields = async (model, fields, entity) => {
   for (const [field, value] of Object.entries(fields)) {
     const existingRecord = await model.findOne({ [field]: value })
     if (existingRecord) {
-      return { error: `${entity} with this ${field} already exists` }
+      return { errors: `${entity} with this ${field} already exists` }
     }
   }
   return null
@@ -149,7 +149,7 @@ const validateUniqueFields = async (model, fields, entity) => {
 
 const validateAdministrators = async (adminIds, mongoModels) => {
   if (!Array.isArray(adminIds)) {
-    return { error: 'Administrators must be an array of ObjectIds.' }
+    return { errors: 'Administrators must be an array of ObjectIds.' }
   }
 
   // Ensure all IDs are valid ObjectIds
@@ -157,13 +157,15 @@ const validateAdministrators = async (adminIds, mongoModels) => {
     mongoose.Types.ObjectId.isValid(id)
   )
   if (!validObjectIds) {
-    return { error: 'Administrators array contains invalid ObjectIds.' }
+    return { errors: 'Administrators array contains invalid ObjectIds.' }
   }
 
   // Check if all provided IDs exist
   const count = await mongoModels.countDocuments({ _id: { $in: adminIds } })
   if (count !== adminIds.length) {
-    return { error: 'Some administrators do not exist in the User collection.' }
+    return {
+      errors: 'Some administrators do not exist in the User collection.'
+    }
   }
 
   return true

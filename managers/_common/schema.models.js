@@ -22,11 +22,6 @@ module.exports = {
     type: 'string',
     length: { min: 3, max: 100 }
   },
-  administrators: {
-    path: 'administrators',
-    type: 'array',
-    length: { min: 1, max: 10 }
-  },
   password: {
     path: 'password',
     type: 'string',
@@ -34,16 +29,16 @@ module.exports = {
     rules: [
       {
         regex: /[A-Z]/,
-        error: 'Password must contain at least one uppercase letter.'
+        errors: 'Password must contain at least one uppercase letter.'
       },
       {
         regex: /[a-z]/,
-        error: 'Password must contain at least one lowercase letter.'
+        errors: 'Password must contain at least one lowercase letter.'
       },
-      { regex: /\d/, error: 'Password must contain at least one digit.' },
+      { regex: /\d/, errors: 'Password must contain at least one digit.' },
       {
         regex: /[@#$!%*?&]/,
-        error: 'Password must contain at least one special character.'
+        errors: 'Password must contain at least one special character.'
       }
     ]
   },
@@ -148,5 +143,59 @@ module.exports = {
     path: 'role',
     type: 'String',
     length: { min: 3, max: 30 }
+  },
+  administrators: {
+    path: 'administrators',
+    type: 'object',
+    length: { min: 1, max: 10 }
+  },
+  schools: {
+    path: 'schools',
+    type: 'object',
+    length: { min: 1, max: 10 }
+  },
+  school: {
+    path: 'school',
+    type: 'String',
+    length: { min: 24, max: 40 }
+  },
+  capacity: {
+    path: 'capacity',
+    type: 'number'
+  },
+  resources: {
+    path: 'resources',
+    type: 'object',
+    length: { min: 1, max: 20 }
+  },
+  students: {
+    path: 'students',
+    type: 'object',
+    length: { min: 1, max: 20 }
+  },
+  classrooms: {
+    path: 'students',
+    type: 'object',
+    length: { min: 1, max: 20 }
+  },
+  firstName: {
+    path: 'firstName',
+    type: 'string',
+    length: { min: 3, max: 100 }
+  },
+  lastName: {
+    path: 'lastName',
+    type: 'string',
+    length: { min: 3, max: 100 }
+  },
+  dateOfBirth: {
+    path: 'dateOfBirth',
+    type: 'string',
+    length: { min: 1, max: 50 }
+  },
+  transferHistory: {
+    path: 'transferHistory',
+    type: 'object',
+    length: { min: 1, max: 20 }
   }
 }

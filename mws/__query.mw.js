@@ -1,17 +1,34 @@
-/* eslint-disable no-unused-vars */
-module.exports = ({ query, config, managers }) => {
+module.exports = ({ query, managers }) => {
   return (req, res, next) => {
     try {
-      // Check if query parameters are missing
-      if (!req.query || Object.keys(req.query).length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: `Query parameters are required. Missing: ${query}`
+      // Ensure `query` is provided and is an array
+      if (!Array.isArray(query)) {
+        return managers.responseDispatcher.dispatch(res, {
+          ok: false,
+          code: 400,
+          errors: 'Invalid.',
+          message:
+            'Invalid query validation configuration. Expected an array of parameters.'
         })
       }
+
+      // Collect missing parameters
+      const missingParams = query.filter((param) => !req.query[param])
+
+      // If any parameters are missing, return an error
+      if (missingParams.length > 0) {
+        return managers.responseDispatcher.dispatch(res, {
+          ok: false,
+          code: 400,
+          errors: 'Invalid.',
+          message: `Missing required query parameters: ${missingParams.join(', ')}`
+        })
+      }
+
+      // All parameters are present; continue
       next()
     } catch (error) {
-      console.error('Query params middleware error:', error)
+      console.error('Query params middleware errors:', error)
       next(error)
     }
   }

@@ -79,12 +79,12 @@ module.exports = class TokenManager {
   /** generate shortId based on a longId */
   v1_createShortToken({ __longToken, __device }) {
     const token = __longToken
-    if (!token) return { error: 'missing token ' }
+    if (!token) return { errors: 'missing token ' }
     console.log('found token', token)
 
     let decoded = this.verifyLongToken({ token })
     if (!decoded) {
-      return { error: 'invalid' }
+      return { errors: 'invalid' }
     }
 
     let shortToken = this.genShortToken({

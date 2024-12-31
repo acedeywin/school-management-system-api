@@ -15,7 +15,7 @@ module.exports = class Auth {
     const user = this.userModels.user
     const roles = await this.roleModels.role
     if (!user) {
-      return { error: 'User model is not loaded' }
+      return { errors: 'User model is not loaded' }
     }
 
     const error = 'Invalid email or password.'
@@ -26,7 +26,7 @@ module.exports = class Auth {
     })
 
     if (!isUser) {
-      return { error }
+      return { errors: error }
     }
 
     const { _id, username, email, role, password: hashedPassword } = isUser
@@ -34,7 +34,7 @@ module.exports = class Auth {
     // Compare passwords
     const isMatch = await bcrypt.compare(password, hashedPassword)
     if (!isMatch) {
-      return { error }
+      return { errors: error }
     }
 
     const { permission } = await roles.findOne({ _id: role })
@@ -54,7 +54,7 @@ module.exports = class Auth {
     return {
       success: true,
       message: 'Logged in successfully.',
-      user: {
+      data: {
         id: _id,
         username,
         email,
@@ -68,13 +68,13 @@ module.exports = class Auth {
     // Add the token to the blacklist
     const decoded = jwt.decode(token)
     if (!decoded) {
-      return { error: 'Invalid token' }
+      return { errors: 'Invalid token' }
     }
 
     const blacklisted = await this.tokenManager.isBlacklisted(token)
 
     if (blacklisted) {
-      return { error: 'You are already logged out' }
+      return { errors: 'You are already logged out' }
     }
 
     const expiresIn = decoded.exp - Math.floor(Date.now() / 1000)

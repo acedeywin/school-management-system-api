@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
 module.exports = ({ config, managers }) => {
-  return (req, res, next) => {
+  return async (req, res, next) => {
     if (!managers.responseDispatcher) {
       console.error('responseDispatcher is not defined')
       return res.status(500).json({
         ok: false,
         code: 500,
-        errors: 'Internal server error: responseDispatcher not found'
+        errors: 'Internal server errors: responseDispatcher not found'
       })
     }
 
@@ -23,14 +23,14 @@ module.exports = ({ config, managers }) => {
 
     const token = authHeader.split(' ')[1]
 
-    const blacklisted = managers.token.isBlacklisted(token)
+    const blacklisted = await managers.token.isBlacklisted(token)
 
     if (blacklisted) {
       return managers.responseDispatcher.dispatch(res, {
         ok: false,
         code: 401,
         errors: 'Unauthorized',
-        message: 'You are already logged out.'
+        message: 'Session expired.'
       })
     }
 

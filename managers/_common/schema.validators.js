@@ -1,7 +1,7 @@
 const { BadRequestError, NotFoundError } = require('../../libs/errors')
 const schema = require('./schema.models')
 
-const validateCreate = (data, schemaKey) => {
+const validateSchema = (data, schemaKey) => {
   const rules = schema[schemaKey]
 
   if (!rules) {
@@ -15,10 +15,15 @@ const validateCreate = (data, schemaKey) => {
 
   // Validate type
   const expectedType = rules.type.toLowerCase()
-  const actualType = Array.isArray(value) ? 'array' : typeof value
+  const actualType = Array.isArray(value) ? 'object' : typeof value
 
   if (value && expectedType !== actualType) {
     throw new BadRequestError(`${rules.path} should be of type ${rules.type}`)
+  }
+
+  // Validate if capacity should be greater than zero
+  if (schemaKey === 'capacity' && typeof value === 'number' && value <= 0) {
+    throw new BadRequestError(`${rules.path} should be greater than zero`)
   }
 
   // Validate length for strings, arrays, and objects
@@ -58,4 +63,4 @@ const validateCreate = (data, schemaKey) => {
   return { valid: true }
 }
 
-module.exports = { validateCreate }
+module.exports = { validateSchema }

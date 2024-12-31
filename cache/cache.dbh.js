@@ -74,7 +74,7 @@ module.exports = ({ prefix, url }) => {
           res = await redisClient.call(...args)
         } catch (error) {
           console.log(error)
-          return { error: error.message || 'unable to execute' }
+          return { errors: error.message || 'unable to execute' }
         }
         let [count, ...foundKeysAndSightings] = res
         let foundSightings = foundKeysAndSightings.filter(
@@ -257,7 +257,7 @@ module.exports = ({ prefix, url }) => {
         try {
           res = await redisClient.call(...args)
         } catch (err) {
-          return { error: err.message ? err.message : err }
+          return { errors: err.message ? err.message : err }
         }
         if (withScores) res = utils.arrayToObj(res)
         return res || []

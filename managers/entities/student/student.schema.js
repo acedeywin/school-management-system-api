@@ -12,7 +12,6 @@ const StudentSchema = new mongoose.Schema({
     required: true
   },
   classroom: { type: mongoose.Schema.Types.ObjectId, ref: 'Classroom' },
-  enrollmentDate: { type: Date, default: Date.now },
   transferHistory: [
     {
       fromSchool: { type: mongoose.Schema.Types.ObjectId, ref: 'School' },

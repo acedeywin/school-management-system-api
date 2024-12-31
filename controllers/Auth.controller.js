@@ -16,14 +16,14 @@ module.exports = class AuthController {
 
       // Check for errors in the result
       if (result.error) {
-        return res.status(400).json({ success: false, error: result.error })
+        return res.status(400).json({ success: false, errors: result.error })
       }
 
       // Successful creation
       return res.status(201).json(result)
     } catch (error) {
       // next()
-      return res.status(403).json({ error })
+      return res.status(403).json({ errors: error })
     }
   }
 
@@ -35,13 +35,13 @@ module.exports = class AuthController {
 
       // Check for errors in the result
       if (result.error) {
-        return res.status(400).json({ success: false, error: result.error })
+        return res.status(400).json({ success: false, errors: result.error })
       }
 
       // Successful creation
       return res.status(201).json(result)
     } catch (error) {
-      return res.status(403).json({ error })
+      return res.status(403).json({ errors: error })
     }
   }
 }

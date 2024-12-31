@@ -9,7 +9,7 @@ module.exports = class Role {
     const role = this.mongoModels.role
 
     if (!role) {
-      return { error: 'Role model is not loaded' }
+      return { errors: 'Role model is not loaded' }
     }
 
     const newRole = await role.create({ permission })
@@ -25,7 +25,7 @@ module.exports = class Role {
     const roles = await this.mongoModels.role.find()
 
     if (!roles) {
-      return { error: 'Role not found' }
+      return { errors: 'Role not found' }
     }
 
     return {
@@ -37,7 +37,7 @@ module.exports = class Role {
   async getRoleById({ roleId }) {
     const role = await this.mongoModels.role.findById(roleId)
     if (!role) {
-      return { error: 'Role not found' }
+      return { errors: 'Role not found' }
     }
 
     return {

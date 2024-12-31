@@ -1,8 +1,8 @@
 const express = require('express')
 const MongoLoader = require('../loaders/MongoLoader')
 const TokenManager = require('../managers/token/Token.manager')
-const UserManager = require('../managers/entities/user/User.manager')
-const UserController = require('../controllers/User.controller')
+const ClassroomManager = require('../managers/entities/classroom/Classroom.manager')
+const ClassroomController = require('../controllers/Classroom.controller')
 const ResponseDispatcher = require('../managers/response_dispatcher/ResponseDispatcher.manager')
 const config = require('../config/index.config')
 const { validateRequest } = require('../mws/Middleware.manager')
@@ -15,53 +15,43 @@ const cache = require('../cache/cache.dbh')({
   url: config.dotEnv.CACHE_REDIS
 })
 
-const userRoutes = express.Router()
+const classroomRoutes = express.Router()
 
 // Initialize dependencies
-const userModels = new MongoLoader({ schemaExtension: 'user.schema.js' }).load()
-const roleModels = new MongoLoader({ schemaExtension: 'role.schema.js' }).load()
+const schoolModels = new MongoLoader({
+  schemaExtension: 'school.schema.js'
+}).load()
+const classroomModels = new MongoLoader({
+  schemaExtension: 'classroom.schema.js'
+}).load()
 
 const tokenManager = new TokenManager({ config, cache })
 const responseDispatcher = new ResponseDispatcher()
 
-const userManager = new UserManager({
+const classroomManager = new ClassroomManager({
   utils,
-  managers: { token: tokenManager },
-  userModels,
-  roleModels
+  schoolModels,
+  classroomModels
 })
 
-const userController = new UserController({ userManager })
+const classroomController = new ClassroomController({ classroomManager })
 
-// Define routes
-userRoutes.post(
-  '/create-user',
-  validateRequest(['username', 'email', 'password', 'role']),
+classroomRoutes.post(
+  '/',
+  validateRequest(['name', 'capacity', 'resources']),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
-    permission: ['superadmin']
+    permission: ['superadmin', 'schooladmin']
   }),
-  userController.createUser.bind(userController)
-)
-
-userRoutes.post(
-  '/superadmin',
-  validateRequest(['username', 'email', 'password']),
-  userController.createSuperadmin.bind(userController)
-)
-
-userRoutes.get(
-  '/users',
-  authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
-  roleMiddleware({
-    managers: { responseDispatcher },
-    permission: ['superadmin']
+  queryMiddleware({
+    query: ['schoolId'],
+    managers: { responseDispatcher }
   }),
-  userController.getUsers.bind(userController)
+  classroomController.createClassroom.bind(classroomController)
 )
 
-userRoutes.get(
+classroomRoutes.get(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
@@ -69,39 +59,60 @@ userRoutes.get(
     permission: ['superadmin', 'schooladmin']
   }),
   queryMiddleware({
-    query: ['userId'],
+    query: ['schoolId'],
     managers: { responseDispatcher }
   }),
-  userController.getuserById.bind(userController)
+  classroomController.getClassrooms.bind(classroomController)
 )
 
-userRoutes.put(
+classroomRoutes.get(
   '/',
-  validateRequest(['username', 'email', 'password', 'role', 'schools']),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
     permission: ['superadmin', 'schooladmin']
   }),
   queryMiddleware({
-    query: ['userId'],
+    query: ['classroomId'],
     managers: { responseDispatcher }
   }),
-  userController.updateUserProfile.bind(userController)
+  classroomController.getClassroomById.bind(classroomController)
 )
 
-userRoutes.delete(
+classroomRoutes.put(
+  '/',
+  validateRequest([
+    'name',
+    'school',
+    'managedBy',
+    'students',
+    'capacity',
+    'resources'
+  ]),
+  authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
+  roleMiddleware({
+    managers: { responseDispatcher },
+    permission: ['superadmin', 'schooladmin']
+  }),
+  queryMiddleware({
+    query: ['classroomId'],
+    managers: { responseDispatcher }
+  }),
+  classroomController.updateClassroom.bind(classroomController)
+)
+
+classroomRoutes.delete(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
-    permission: ['superadmin']
+    permission: ['superadmin', 'schooladmin']
   }),
   queryMiddleware({
-    query: ['userId'],
+    query: ['classroomId'],
     managers: { responseDispatcher }
   }),
-  userController.deleteUserProfile.bind(userController)
+  classroomController.deleteClassroom.bind(classroomController)
 )
 
-module.exports = userRoutes
+module.exports = classroomRoutes

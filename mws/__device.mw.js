@@ -12,7 +12,7 @@ module.exports = () => {
 
       next()
     } catch (error) {
-      console.error('Device middleware error:', error)
+      console.error('Device middleware errors:', error)
       next(error)
     }
   }

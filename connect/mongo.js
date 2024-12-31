@@ -19,7 +19,7 @@ module.exports = ({ uri }) => {
 
   // If the connection throws an error
   mongoose.connection.on('error', function (err) {
-    console.log('💾  Mongoose default connection error: ' + err)
+    console.log('💾  Mongoose default connection errors: ' + err)
     console.log(
       '=> if using local mongodb: make sure that mongo server is running \n' +
         '=> if using online mongodb: check your internet connection \n'

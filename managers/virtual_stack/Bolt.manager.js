@@ -30,7 +30,7 @@ module.exports = class StackBolt {
   }
 
   /** execute the end of the stack */
-  end({ error } = {}) {
+  end({ errors: error } = {}) {
     error = error || 'Unexpected Failure'
     this.req.stackError = error
     /** if the last node is the one that is call the end */
@@ -39,7 +39,7 @@ module.exports = class StackBolt {
       debug(`stack broke: `, error)
       if (this.res.end) this.res.end()
     } else {
-      debug(`stack error: `, error)
+      debug(`stack errors: `, error)
       this.index = this.stack.length - 1
       this.run({ index: this.index })
     }
@@ -75,7 +75,7 @@ module.exports = class StackBolt {
 
     if (!fn) {
       console.log('___Function not found __ Jumping ____ ')
-      // this.end({ error: `function not found on function ${fnBlueprint.key} ` })
+      // this.end({ errors: `function not found on function ${fnBlueprint.key} ` })
     } else {
       /** contains information about which app, which route, and which module
        * is using the function
@@ -95,7 +95,7 @@ module.exports = class StackBolt {
         })
       } catch (err) {
         console.log(`failed to execute ${fnKey}:`, err)
-        this.end({ error: `execution failed on function ${fnKey}, ${err}` })
+        this.end({ errors: `execution failed on function ${fnKey}, ${err}` })
       }
     }
   }

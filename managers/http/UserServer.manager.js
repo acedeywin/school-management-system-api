@@ -1,6 +1,7 @@
 const http = require('http')
 const express = require('express')
 const cors = require('cors')
+const rateLimit = require('express-rate-limit')
 const app = express()
 const routes = require('../../routes/index')
 
@@ -21,6 +22,12 @@ module.exports = class UserServer {
     app.use(express.json())
     app.use(express.urlencoded({ extended: true }))
     app.use('/static', express.static('public'))
+    // Rate Limiting
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100 // Limit each IP to 100 requests per window
+    })
+    app.use(limiter)
 
     //Expose routes
     app.use('/api/v1', routes)

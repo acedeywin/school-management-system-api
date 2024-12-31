@@ -19,12 +19,13 @@ module.exports = class School {
     phoneNumber,
     email,
     website,
-    administrators
+    administrators,
+    adminId
   }) {
     const school = this.mongoModels.school
 
     if (!school) {
-      return { error: 'School model is not loaded' }
+      return { errors: 'School model is not loaded' }
     }
 
     // // Check if the school already exists
@@ -36,6 +37,16 @@ module.exports = class School {
     )
     if (validationError) {
       return validationError
+    }
+
+    if (!Array.isArray(administrators)) {
+      // If administrators is not defined or not an array, initialize it as an empty array
+      administrators = []
+    }
+
+    if (!administrators.includes(adminId)) {
+      // Add adminId to the administrators array if it doesn't already exist
+      administrators.push(adminId)
     }
 
     await this.utils.validateAdministrators(
@@ -50,13 +61,13 @@ module.exports = class School {
       phoneNumber,
       email,
       website,
-      administrators,
-      createdAt: new Date()
+      administrators
     })
 
     return {
       success: true,
-      school: newSchool
+      message: 'School created successfully.',
+      data: newSchool
     }
   }
 
@@ -81,12 +92,13 @@ module.exports = class School {
     })
 
     if (!schools || schools.length === 0) {
-      return { error: 'No school found for the given admin ID' }
+      return { errors: 'No school found for the given admin ID' }
     }
 
     return {
       success: true,
-      schools,
+      message: 'Schools fetched successfully.',
+      data: schools,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalSchools / limit),
@@ -106,13 +118,14 @@ module.exports = class School {
 
     if (!school) {
       return {
-        error: 'School not found or you do not have access to this school'
+        errors: 'School not found or you do not have access to this school'
       }
     }
 
     return {
       success: true,
-      school
+      message: 'School fetched successfully.',
+      data: school
     }
   }
 
@@ -122,13 +135,13 @@ module.exports = class School {
     const school = await this.mongoModels.school.findById(schoolId)
 
     if (!school) {
-      return { error: 'School not found.' }
+      return { errors: 'School not found.' }
     }
 
     // Check if superadminId is part of administrators
     if (!school.administrators.includes(superadminId)) {
       return {
-        error:
+        errors:
           'Unauthorized. You are not an authorized administrator of this school.'
       }
     }
@@ -172,35 +185,32 @@ module.exports = class School {
 
     return {
       success: true,
-      school: updatedSchool
+      message: 'School updated successfully.',
+      data: updatedSchool
     }
   }
 
   // Delete a school
   async deleteSchool({ schoolId, superadminId }) {
-    const schoolModel = this.mongoModels.school
+    const school = this.mongoModels.school
 
     // Fetch the school document
-    const school = await schoolModel.findById(schoolId)
+    const isSchool = await school.findById(schoolId)
 
-    if (!school) {
-      return { error: 'School not found.' }
+    if (!isSchool) {
+      return { errors: 'School not found.' }
     }
 
     // Check if the superadminId is in the administrators array
-    if (!school.administrators.includes(superadminId)) {
+    if (!isSchool.administrators.includes(superadminId)) {
       return {
-        error:
+        errors:
           'Unauthorized. Only authorized administrators can delete this school.'
       }
     }
 
     // Delete the school
-    const deletedSchool = await schoolModel.findByIdAndDelete({ _id: schoolId })
-
-    if (!deletedSchool) {
-      return { error: 'Deletion failed. School not found.' }
-    }
+    await school.findByIdAndDelete({ _id: schoolId })
 
     return {
       success: true,

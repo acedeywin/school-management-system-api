@@ -7,6 +7,7 @@ const config = require('../config/index.config')
 const { validateRequest } = require('../mws/Middleware.manager')
 const deviceMiddleware = require('../mws/__device.mw')
 const queryMiddleware = require('../mws/__query.mw')
+const ResponseDispatcher = require('../managers/response_dispatcher/ResponseDispatcher.manager')
 const cache = require('../cache/cache.dbh')({
   prefix: config.dotEnv.CACHE_PREFIX,
   url: config.dotEnv.CACHE_REDIS
@@ -27,6 +28,7 @@ const authManager = new AuthManager({
 })
 
 const authController = new AuthController({ authManager })
+const responseDispatcher = new ResponseDispatcher()
 
 authRoutes.post(
   '/login',
@@ -36,7 +38,7 @@ authRoutes.post(
 )
 authRoutes.put(
   '/logout',
-  queryMiddleware({ query: 'token' }),
+  queryMiddleware({ query: ['token'], managers: { responseDispatcher } }),
   authController.logout.bind(authController)
 )
 

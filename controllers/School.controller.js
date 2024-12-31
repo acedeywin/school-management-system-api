@@ -4,29 +4,32 @@ module.exports = class SchoolController {
   }
 
   async createSchool(req, res) {
-    try {
-      const { name, address, phoneNumber, email, website, administrators } =
-        req.body
+    // try {
+    const { name, address, phoneNumber, email, website, administrators } =
+      req.body
 
-      const result = await this.schoolManager.createSchool({
-        name,
-        address,
-        phoneNumber,
-        email,
-        website,
-        administrators
-      })
+    const adminId = req.user.userId
 
-      // Check for errors in the result
-      if (result.error) {
-        return res.status(400).json({ success: false, error: result.error })
-      }
+    const result = await this.schoolManager.createSchool({
+      name,
+      address,
+      phoneNumber,
+      email,
+      website,
+      administrators,
+      adminId
+    })
 
-      // Successful creation
-      return res.status(201).json(result)
-    } catch (error) {
-      return res.status(403).json({ error })
+    // Check for errors in the result
+    if (result.error) {
+      return res.status(400).json({ success: false, errors: result.error })
     }
+
+    // Successful creation
+    return res.status(201).json(result)
+    // } catch (error) {
+    //   return res.status(403).json({ errors: error })
+    // }
   }
 
   async getSchools(req, res) {
@@ -42,13 +45,13 @@ module.exports = class SchoolController {
 
       // Check for errors in the result
       if (result.error) {
-        return res.status(400).json({ success: false, error: result.error })
+        return res.status(400).json({ success: false, errors: result.error })
       }
 
       // Successful creation
       return res.status(201).json(result)
     } catch (error) {
-      return res.status(403).json({ error })
+      return res.status(403).json({ errors: error })
     }
   }
 
@@ -64,13 +67,13 @@ module.exports = class SchoolController {
 
       // Check for errors in the result
       if (result.error) {
-        return res.status(400).json({ success: false, error: result.error })
+        return res.status(400).json({ success: false, errors: result.error })
       }
 
       // Successful creation
       return res.status(201).json(result)
     } catch (error) {
-      return res.status(403).json({ error })
+      return res.status(403).json({ errors: error })
     }
   }
 
@@ -87,13 +90,13 @@ module.exports = class SchoolController {
 
       // Check for errors in the result
       if (result.error) {
-        return res.status(400).json({ success: false, error: result.error })
+        return res.status(400).json({ success: false, errors: result.error })
       }
 
       // Successful creation
       return res.status(201).json(result)
     } catch (error) {
-      return res.status(403).json({ error })
+      return res.status(403).json({ errors: error })
     }
   }
 
@@ -111,14 +114,14 @@ module.exports = class SchoolController {
 
     // Check for errors in the result
     if (result.error) {
-      return res.status(400).json({ success: false, error: result.error })
+      return res.status(400).json({ success: false, errors: result.error })
     }
 
     // Successful creation
     return res.status(201).json(result)
 
     // } catch (error) {
-    //     return res.status(403).json({ error })
+    //     return res.status(403).json({ errors: error })
     // }
   }
 }

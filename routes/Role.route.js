@@ -8,6 +8,10 @@ const authMiddleware = require('../mws/__token.mw')
 const roleMiddleware = require('../mws/__role.mw')
 const queryMiddleware = require('../mws/__query.mw')
 const config = require('../config/index.config')
+const cache = require('../cache/cache.dbh')({
+  prefix: config.dotEnv.CACHE_PREFIX,
+  url: config.dotEnv.CACHE_REDIS
+})
 
 const roleRoutes = express.Router()
 
@@ -16,7 +20,7 @@ const mongoModels = new MongoLoader({
 }).load()
 const roleManager = new RoleManager({ mongoModels })
 const responseDispatcher = new ResponseDispatcher()
-const tokenManager = new TokenManager({ config })
+const tokenManager = new TokenManager({ config, cache })
 
 const roleController = new RoleController({ roleManager })
 
@@ -41,7 +45,7 @@ roleRoutes.get(
 roleRoutes.get(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
-  queryMiddleware({ query: 'roleId' }),
+  queryMiddleware({ query: ['roleId'], managers: { responseDispatcher } }),
   roleMiddleware({
     managers: { responseDispatcher },
     permission: ['superadmin']

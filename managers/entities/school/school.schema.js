@@ -1,11 +1,11 @@
 const mongoose = require('mongoose')
 
 const SchoolSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  name: { type: String, required: true, unique: true },
   address: { type: String, required: true },
-  phoneNumber: { type: String, required: true },
+  phoneNumber: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
-  website: { type: String },
+  website: { type: String, unique: true },
   administrators: [
     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
   ],

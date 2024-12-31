@@ -60,7 +60,7 @@ schoolRoutes.get(
 schoolRoutes.get(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
-  queryMiddleware({ query: 'schoolId' }),
+  queryMiddleware({ query: ['schoolId'], managers: { responseDispatcher } }),
   roleMiddleware({
     managers: { responseDispatcher },
     permission: ['superadmin', 'schooladmin']
@@ -69,8 +69,17 @@ schoolRoutes.get(
 )
 schoolRoutes.put(
   '/',
+  validateRequest([
+    'name',
+    'address',
+    'phoneNumber',
+    'email',
+    'website',
+    'administrators',
+    'classrooms'
+  ]),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
-  queryMiddleware({ query: 'schoolId' }),
+  queryMiddleware({ query: ['schoolId'], managers: { responseDispatcher } }),
   roleMiddleware({
     managers: { responseDispatcher },
     permission: ['superadmin']
@@ -80,7 +89,7 @@ schoolRoutes.put(
 schoolRoutes.delete(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
-  queryMiddleware({ query: 'schoolId' }),
+  queryMiddleware({ query: ['schoolId'], managers: { responseDispatcher } }),
   roleMiddleware({
     managers: { responseDispatcher },
     permission: ['superadmin']
