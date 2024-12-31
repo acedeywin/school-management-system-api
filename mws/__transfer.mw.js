@@ -1,3 +1,10 @@
+/**
+ * Middleware to validate and verify the transfer process for a student.
+ *
+ * @param {Object} managers - Manager objects for handling responses and operations.
+ * @param {Object} mongoModels - MongoDB models for schools, classrooms, and students.
+ * @returns {Function} Middleware function to validate transfer operations.
+ */
 module.exports = ({ managers, mongoModels }) => {
   return async (req, res, next) => {
     try {
@@ -22,8 +29,6 @@ module.exports = ({ managers, mongoModels }) => {
       // Check if receiving school is valid
       const isToSchool = await school.findById(toSchool)
 
-      console.log('isToSchool is here', isToSchool)
-
       if (!isToSchool) {
         return managers.responseDispatcher.dispatch(res, {
           ok: false,
@@ -32,6 +37,7 @@ module.exports = ({ managers, mongoModels }) => {
         })
       }
 
+      // Check if receiving classroom belongs to the receiving school
       if (!isToSchool.classrooms.includes(toClassroom)) {
         return managers.responseDispatcher.dispatch(res, {
           ok: false,
@@ -50,7 +56,7 @@ module.exports = ({ managers, mongoModels }) => {
         })
       }
 
-      // Verify that receiving hs not excceed it capacity
+      // Verify that receiving classroom has not exceeded its capacity
       if (receivingClassroom.students.length === receivingClassroom.capacity) {
         return managers.responseDispatcher.dispatch(res, {
           ok: false,
@@ -59,14 +65,18 @@ module.exports = ({ managers, mongoModels }) => {
         })
       }
 
-      // check if student is valid
+      // Check if the student exists
       const isStudent = await student.findById(studentId)
 
       if (!isStudent) {
-        return { errors: 'Student not found.' }
+        return managers.responseDispatcher.dispatch(res, {
+          ok: false,
+          code: 404,
+          errors: 'Student not found.'
+        })
       }
 
-      // Verify if the school administrator is valid
+      // Verify if the school administrator is valid for the current school
       const isSchool = await school.findById(isStudent.school._id)
 
       if (!isSchool) {
@@ -86,7 +96,7 @@ module.exports = ({ managers, mongoModels }) => {
         })
       }
 
-      // verify that classroom is valid
+      // Verify if the current classroom is valid
       const isClassroom = await classroom.findById(isStudent.classroom._id)
 
       if (!isClassroom) {

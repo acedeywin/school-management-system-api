@@ -41,6 +41,18 @@ const studentManager = new StudentManager({
 })
 const studentController = new StudentController({ studentManager })
 
+/**
+ * @route POST /enroll
+ * @description Enrolls a new student into a school and classroom.
+ * @middleware validateRequest, authMiddleware, roleMiddleware, queryMiddleware, enrollMiddleware
+ * @param {string} firstName - First name of the student (from body).
+ * @param {string} lastName - Last name of the student (from body).
+ * @param {string} email - Email address of the student (from body).
+ * @param {string} phoneNumber - Phone number of the student (from body).
+ * @param {Date} dateOfBirth - Date of birth of the student (from body).
+ * @param {string} schoolId - ID of the school (from query).
+ * @param {string} classroomId - ID of the classroom (from query).
+ */
 studentRoutes.post(
   '/enroll',
   validateRequest([
@@ -66,6 +78,15 @@ studentRoutes.post(
   studentController.enrollStudent.bind(studentController)
 )
 
+/**
+ * @route PUT /transfer
+ * @description Transfers a student to a different school and/or classroom.
+ * @middleware validateRequest, authMiddleware, roleMiddleware, queryMiddleware, transferMiddleware
+ * @param {string} toSchool - ID of the new school (from body.transferHistory).
+ * @param {string} toClassroom - ID of the new classroom (from body.transferHistory).
+ * @param {Date} transferDate - Date of the transfer (from body.transferHistory).
+ * @param {string} studentId - ID of the student to transfer (from query).
+ */
 studentRoutes.put(
   '/transfer',
   validateRequest(['transferHistory']),
@@ -85,6 +106,14 @@ studentRoutes.put(
   studentController.transferStudent.bind(studentController)
 )
 
+/**
+ * @route GET /students
+ * @description Retrieves a list of students in a specified school.
+ * @middleware authMiddleware, roleMiddleware, queryMiddleware
+ * @param {string} schoolId - ID of the school (from query).
+ * @param {number} page - Page number for pagination (default: 1, from query).
+ * @param {number} limit - Number of records per page (default: 10, from query).
+ */
 studentRoutes.get(
   '/students',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
@@ -99,6 +128,12 @@ studentRoutes.get(
   studentController.getStudents.bind(studentController)
 )
 
+/**
+ * @route GET /
+ * @description Retrieves details of a specific student by their ID.
+ * @middleware authMiddleware, roleMiddleware, queryMiddleware
+ * @param {string} studentId - ID of the student (from query).
+ */
 studentRoutes.get(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
@@ -113,8 +148,22 @@ studentRoutes.get(
   studentController.getStudentById.bind(studentController)
 )
 
+/**
+ * @route PUT /
+ * @description Updates details of a student.
+ * @middleware validateRequest, authMiddleware, roleMiddleware, queryMiddleware
+ * @param {string} studentId - ID of the student to update (from query).
+ * @param {Object} updates - Fields to update (from body).
+ */
 studentRoutes.put(
   '/',
+  validateRequest([
+    'firstName',
+    'lastName',
+    'email',
+    'phoneNumber',
+    'dateOfBirth'
+  ]),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
@@ -127,6 +176,12 @@ studentRoutes.put(
   studentController.updateStudent.bind(studentController)
 )
 
+/**
+ * @route DELETE /
+ * @description Deletes a student by their ID.
+ * @middleware authMiddleware, roleMiddleware, queryMiddleware
+ * @param {string} studentId - ID of the student to delete (from query).
+ */
 studentRoutes.delete(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),

@@ -1,4 +1,5 @@
 const express = require('express')
+const bcrypt = require('bcrypt')
 const MongoLoader = require('../loaders/MongoLoader')
 const TokenManager = require('../managers/token/Token.manager')
 const UserManager = require('../managers/entities/user/User.manager')
@@ -25,6 +26,7 @@ const tokenManager = new TokenManager({ config, cache })
 const responseDispatcher = new ResponseDispatcher()
 
 const userManager = new UserManager({
+  bcrypt,
   utils,
   managers: { token: tokenManager },
   userModels,
@@ -34,6 +36,11 @@ const userManager = new UserManager({
 const userController = new UserController({ userManager })
 
 // Define routes
+/**
+ * @route POST /create-user
+ * @description Create a new user
+ * @middleware validateRequest, authMiddleware, roleMiddleware
+ */
 userRoutes.post(
   '/create-user',
   validateRequest(['username', 'email', 'password', 'role']),
@@ -45,12 +52,22 @@ userRoutes.post(
   userController.createUser.bind(userController)
 )
 
+/**
+ * @route POST /superadmin
+ * @description Create a superadmin user
+ * @middleware validateRequest
+ */
 userRoutes.post(
   '/superadmin',
   validateRequest(['username', 'email', 'password']),
   userController.createSuperadmin.bind(userController)
 )
 
+/**
+ * @route GET /users
+ * @description Get a list of users
+ * @middleware authMiddleware, roleMiddleware
+ */
 userRoutes.get(
   '/users',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
@@ -61,6 +78,11 @@ userRoutes.get(
   userController.getUsers.bind(userController)
 )
 
+/**
+ * @route GET /
+ * @description Get user details by ID
+ * @middleware authMiddleware, roleMiddleware, queryMiddleware
+ */
 userRoutes.get(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
@@ -75,6 +97,11 @@ userRoutes.get(
   userController.getuserById.bind(userController)
 )
 
+/**
+ * @route PUT /
+ * @description Update user profile
+ * @middleware validateRequest, authMiddleware, roleMiddleware, queryMiddleware
+ */
 userRoutes.put(
   '/',
   validateRequest(['username', 'email', 'password', 'role', 'schools']),
@@ -90,6 +117,11 @@ userRoutes.put(
   userController.updateUserProfile.bind(userController)
 )
 
+/**
+ * @route DELETE /
+ * @description Delete user profile
+ * @middleware authMiddleware, roleMiddleware, queryMiddleware
+ */
 userRoutes.delete(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),

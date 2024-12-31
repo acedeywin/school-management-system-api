@@ -17,10 +17,12 @@ const cache = require('../cache/cache.dbh')({
 
 const schoolRoutes = express.Router()
 
+// Initialize MongoDB models
 const mongoModels = new MongoLoader({
   schemaExtension: 'school.schema.js'
 }).load()
 
+// Initialize necessary managers
 const tokenManager = new TokenManager({ config, cache })
 const responseDispatcher = new ResponseDispatcher()
 
@@ -31,6 +33,17 @@ const schoolManager = new SchoolManager({
 
 const schoolController = new SchoolController({ schoolManager })
 
+/**
+ * @route POST /create-school
+ * @description Creates a new school
+ * @middleware validateRequest, authMiddleware, roleMiddleware
+ * @param {string} name - Name of the school
+ * @param {string} address - Address of the school
+ * @param {string} phoneNumber - Phone number of the school
+ * @param {string} email - Email address of the school
+ * @param {string} website - Website URL of the school
+ * @param {Array<string>} administrators - List of administrator IDs
+ */
 schoolRoutes.post(
   '/create-school',
   validateRequest([
@@ -48,6 +61,14 @@ schoolRoutes.post(
   }),
   schoolController.createSchool.bind(schoolController)
 )
+
+/**
+ * @route GET /schools
+ * @description Fetches all schools for the authenticated administrator
+ * @middleware authMiddleware, roleMiddleware
+ * @param {number} [page=1] - Page number for pagination
+ * @param {number} [limit=10] - Number of records per page
+ */
 schoolRoutes.get(
   '/schools',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
@@ -57,6 +78,13 @@ schoolRoutes.get(
   }),
   schoolController.getSchools.bind(schoolController)
 )
+
+/**
+ * @route GET /
+ * @description Fetches details of a school by its ID
+ * @middleware authMiddleware, queryMiddleware, roleMiddleware
+ * @param {string} schoolId - ID of the school to fetch
+ */
 schoolRoutes.get(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
@@ -67,6 +95,14 @@ schoolRoutes.get(
   }),
   schoolController.getSchoolById.bind(schoolController)
 )
+
+/**
+ * @route PUT /
+ * @description Updates details of a school
+ * @middleware validateRequest, authMiddleware, queryMiddleware, roleMiddleware
+ * @param {string} schoolId - ID of the school to update
+ * @param {Object} updates - Fields to update in the school
+ */
 schoolRoutes.put(
   '/',
   validateRequest([
@@ -86,6 +122,13 @@ schoolRoutes.put(
   }),
   schoolController.updateSchool.bind(schoolController)
 )
+
+/**
+ * @route DELETE /
+ * @description Deletes a school
+ * @middleware authMiddleware, queryMiddleware, roleMiddleware
+ * @param {string} schoolId - ID of the school to delete
+ */
 schoolRoutes.delete(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),

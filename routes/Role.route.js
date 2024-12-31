@@ -1,3 +1,8 @@
+/**
+ * @file Role.routes.js
+ * @description Defines and initializes routes for role management.
+ */
+
 const express = require('express')
 const MongoLoader = require('../loaders/MongoLoader')
 const RoleManager = require('../managers/entities/role/Role.manager')
@@ -15,6 +20,7 @@ const cache = require('../cache/cache.dbh')({
 
 const roleRoutes = express.Router()
 
+// Initialize dependencies
 const mongoModels = new MongoLoader({
   schemaExtension: 'role.schema.js'
 }).load()
@@ -24,6 +30,11 @@ const tokenManager = new TokenManager({ config, cache })
 
 const roleController = new RoleController({ roleManager })
 
+/**
+ * @route POST /create-role
+ * @description Creates a new role
+ * @middleware authMiddleware, roleMiddleware
+ */
 roleRoutes.post(
   '/create-role',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
@@ -33,6 +44,12 @@ roleRoutes.post(
   }),
   roleController.createRole.bind(roleController)
 )
+
+/**
+ * @route GET /roles
+ * @description Fetches all roles
+ * @middleware authMiddleware, roleMiddleware
+ */
 roleRoutes.get(
   '/roles',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
@@ -42,6 +59,12 @@ roleRoutes.get(
   }),
   roleController.getRoles.bind(roleController)
 )
+
+/**
+ * @route GET /
+ * @description Fetches a role by ID
+ * @middleware authMiddleware, queryMiddleware, roleMiddleware
+ */
 roleRoutes.get(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),

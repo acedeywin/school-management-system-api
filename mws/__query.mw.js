@@ -1,3 +1,10 @@
+/**
+ * Middleware to validate required query parameters in a request.
+ *
+ * @param {Array} query - An array of query parameter names that are required.
+ * @param {Object} managers - Manager objects for handling operations and dispatching responses.
+ * @returns {Function} Middleware function to validate query parameters.
+ */
 module.exports = ({ query, managers }) => {
   return (req, res, next) => {
     try {
@@ -25,7 +32,6 @@ module.exports = ({ query, managers }) => {
         })
       }
 
-      // All parameters are present; continue
       next()
     } catch (error) {
       console.error('Query params middleware errors:', error)

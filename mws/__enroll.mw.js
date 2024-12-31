@@ -1,3 +1,10 @@
+/**
+ * Middleware to validate the enrollment of a student into a classroom within a school.
+ *
+ * @param {Object} managers - Manager objects to handle operations and dispatch responses.
+ * @param {Object} mongoModels - MongoDB models for accessing school, classroom, and student collections.
+ * @returns {Function} Middleware function to validate the request.
+ */
 module.exports = ({ managers, mongoModels }) => {
   return async (req, res, next) => {
     try {
@@ -18,7 +25,7 @@ module.exports = ({ managers, mongoModels }) => {
         })
       }
 
-      // Verify if the school administrator is valid
+      // Verify if the school exists
       const isSchool = await school.findById(schoolId)
 
       if (!isSchool) {
@@ -29,6 +36,7 @@ module.exports = ({ managers, mongoModels }) => {
         })
       }
 
+      // Verify if the administrator is associated with the school
       if (!isSchool.administrators.includes(adminId)) {
         return managers.responseDispatcher.dispatch(res, {
           ok: false,
@@ -38,6 +46,7 @@ module.exports = ({ managers, mongoModels }) => {
         })
       }
 
+      // Verify if the classroom is associated with the school
       if (!isSchool.classrooms.includes(classroomId)) {
         return managers.responseDispatcher.dispatch(res, {
           ok: false,
@@ -46,6 +55,7 @@ module.exports = ({ managers, mongoModels }) => {
         })
       }
 
+      // Check if the classroom exists
       const isClassroom = await classroom.findById(classroomId)
 
       if (!isClassroom) {
@@ -56,6 +66,7 @@ module.exports = ({ managers, mongoModels }) => {
         })
       }
 
+      // Check if the classroom has reached its maximum capacity
       if (isClassroom.students.length === isClassroom.capacity) {
         return managers.responseDispatcher.dispatch(res, {
           ok: false,

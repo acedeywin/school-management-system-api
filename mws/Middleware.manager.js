@@ -1,5 +1,14 @@
 const { validateSchema } = require('../managers/_common/schema.validators')
 
+/**
+ * Middleware to validate request payload against a schema
+ * @param {Array<string>} schemaKeys - Array of schema keys to validate against
+ * @returns {Function} Express middleware function
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body containing the payload to validate
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
 const validateRequest = (schemaKeys) => (req, res, next) => {
   try {
     schemaKeys.forEach((key) => {
@@ -17,33 +26,4 @@ const validateRequest = (schemaKeys) => (req, res, next) => {
   }
 }
 
-const validateSchoolAdministrator = (mongoModel) => (req, res, next) => {
-  let { schoolId, adminId } = req.query
-
-  if (!schoolId) {
-    schoolId = req.user.schoolId
-  }
-
-  mongoModel
-    .findById(schoolId)
-    .then((school) => {
-      if (!school) {
-        return res.status(404).json({ errors: 'School not found' })
-      }
-
-      if (!school.administrators.includes(adminId)) {
-        return res.status(400).json({
-          errors:
-            'The provided administrator is not associated with this school'
-        })
-      }
-
-      next()
-    })
-    .catch((error) => {
-      console.error('Validation errors:', error)
-      res.status(500).json({ errors: error.message })
-    })
-}
-
-module.exports = { validateRequest, validateSchoolAdministrator }
+module.exports = { validateRequest }

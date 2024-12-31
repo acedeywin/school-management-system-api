@@ -1,7 +1,14 @@
-const bcrypt = require('bcrypt')
-
 module.exports = class User {
-  constructor({ utils, managers, userModels, roleModels } = {}) {
+  /**
+   * @param {Object} options - Dependencies and configurations for User
+   * @param {Object} options.bcrypt - Bcrypt library for password hashing
+   * @param {Object} options.utils - Utility functions
+   * @param {Object} options.managers - Manager instances, including token manager
+   * @param {Object} options.userModels - MongoDB models for users
+   * @param {Object} options.roleModels - MongoDB models for roles
+   */
+  constructor({ bcrypt, utils, managers, userModels, roleModels } = {}) {
+    this.bcrypt = bcrypt
     this.utils = utils
     this.userModels = userModels
     this.roleModels = roleModels
@@ -16,10 +23,18 @@ module.exports = class User {
     ]
   }
 
+  /**
+   * Create a new user
+   * @param {Object} userDetails - Details of the user to be created
+   * @param {string} userDetails.username - Username of the user
+   * @param {string} userDetails.email - Email address of the user
+   * @param {string} userDetails.password - Password of the user
+   * @param {string} userDetails.role - Role ID for the user
+   * @returns {Object} Result of user creation
+   */
   async createUser({ username, email, password, role }) {
     const user = this.userModels.user
 
-    // // Check if the user already exists
     const fieldsToCheck = { username, email }
     const validationError = await this.utils.validateUniqueFields(
       user,
@@ -30,14 +45,12 @@ module.exports = class User {
       return validationError
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await this.bcrypt.hash(password, 10)
 
     if (!user) {
       return { errors: 'User model is not loaded' }
     }
 
-    // // Create the user in MongoDB
     const createdUser = await user.create({
       username,
       email,
@@ -57,6 +70,14 @@ module.exports = class User {
     }
   }
 
+  /**
+   * Create a superadmin user
+   * @param {Object} superadminDetails - Details of the superadmin to be created
+   * @param {string} superadminDetails.username - Username of the superadmin
+   * @param {string} superadminDetails.email - Email address of the superadmin
+   * @param {string} superadminDetails.password - Password of the superadmin
+   * @returns {Object} Result of superadmin creation
+   */
   async createSuperadmin({ username, email, password }) {
     const role = await this.roleModels.role
     let permission = await role.findOne({ permission: 'superadmin' })
@@ -75,6 +96,13 @@ module.exports = class User {
     return superadmin
   }
 
+  /**
+   * Fetch a paginated list of users
+   * @param {Object} pagination - Pagination details
+   * @param {number} pagination.page - Current page number
+   * @param {number} pagination.limit - Number of records per page
+   * @returns {Object} Result of fetching users
+   */
   async getUsers({ page = 1, limit = 10 }) {
     const skip = (page - 1) * limit
 
@@ -92,12 +120,10 @@ module.exports = class User {
       .skip(skip)
       .limit(limit)
 
-    // Check if no users found
     if (!isUser || isUser.length === 0) {
       return { errors: 'No user found' }
     }
 
-    // Count the total number of users for pagination metadata
     const totalUsers = await user.countDocuments()
 
     return {
@@ -112,6 +138,14 @@ module.exports = class User {
     }
   }
 
+  /**
+   * Fetch user details by ID
+   * @param {Object} params - Parameters for fetching user
+   * @param {string} params.adminId - ID of the admin requesting the data
+   * @param {string} params.userId - ID of the user to fetch
+   * @param {string} params.permission - Permission level of the admin
+   * @returns {Object} Result of fetching user
+   */
   async getuserById({ adminId, userId, permission }) {
     const user = this.userModels.user
 
@@ -119,14 +153,11 @@ module.exports = class User {
       return { errors: 'User model is not loaded' }
     }
 
-    // Fetch the user, excluding sensitive data
     const isUser = await user
       .findById(userId)
       .select('-password')
       .populate('role')
-      .populate('school')
 
-    // Check if no users found
     if (!isUser) {
       return { errors: 'No user found.' }
     }
@@ -142,8 +173,17 @@ module.exports = class User {
     }
   }
 
+  /**
+   * Update a user profile
+   * @param {Object} params - Parameters for updating user profile
+   * @param {string} params.adminId - ID of the admin requesting the update
+   * @param {string} params.userId - ID of the user to update
+   * @param {string} params.permission - Permission level of the admin
+   * @param {Object} params.updates - Updates to be applied
+   * @returns {Object} Result of updating user profile
+   */
   async updateUserProfile({ adminId, userId, permission, updates }) {
-    const user = this.userModels.user.findById(userId)
+    const user = await this.userModels.user.findById(userId)
 
     if (!user) {
       return { errors: 'User not found.' }
@@ -153,31 +193,26 @@ module.exports = class User {
       return { errors: 'You are not authorized to perform this action.' }
     }
 
-    // Handle schools updates
     if (updates.schools) {
       const { add = [], remove = [] } = updates.schools
 
-      // Add schools, ensuring no duplicates
       for (const school of add) {
         if (!user.schools.includes(school)) {
           user.schools.push(adminId)
         }
       }
 
-      // Remove schools
       user.schools = user.schools.filter(
         (school) => !remove.includes(school.toString())
       )
     }
 
-    // Update other fields
     const updatableFields = ['username', 'email', 'password', 'role']
 
     for (const field of updatableFields) {
       if (updates[field] !== undefined) {
         if (field === 'password') {
-          // Hash the password before updating
-          const hashedPassword = await bcrypt.hash(updates[field], 10)
+          const hashedPassword = await this.bcrypt.hash(updates[field], 10)
           user[field] = hashedPassword
         } else {
           user[field] = updates[field]
@@ -187,15 +222,21 @@ module.exports = class User {
 
     user.updatedAt = new Date()
 
-    const updatedUser = await user.save()
+    await user.save()
 
     return {
       success: true,
-      message: 'User profile updated successfully.',
-      data: updatedUser
+      message: 'User profile updated successfully.'
     }
   }
 
+  /**
+   * Delete a user profile
+   * @param {Object} params - Parameters for deleting user profile
+   * @param {string} params.adminId - ID of the admin requesting the deletion
+   * @param {string} params.userId - ID of the user to delete
+   * @returns {Object} Result of deleting user profile
+   */
   async deleteUserProfile({ adminId, userId }) {
     const user = this.userModels.user
 
@@ -207,15 +248,12 @@ module.exports = class User {
       return { errors: 'You are not authorized to perform this action.' }
     }
 
-    // Fetch the user
     const isUser = await user.findById(userId)
 
-    // Check if no user found
     if (!isUser) {
       return { errors: 'No user found.' }
     }
 
-    // / Delete the User profile
     await user.findByIdAndDelete({
       _id: userId
     })

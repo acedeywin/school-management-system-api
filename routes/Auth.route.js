@@ -1,4 +1,11 @@
+/**
+ * @file Auth.route.js
+ * @description Defines and initializes routes for authentication.
+ */
+
 const express = require('express')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const MongoLoader = require('../loaders/MongoLoader')
 const TokenManager = require('../managers/token/Token.manager')
 const AuthManager = require('../managers/entities/auth/Auth.manager')
@@ -15,12 +22,14 @@ const cache = require('../cache/cache.dbh')({
 
 const authRoutes = express.Router()
 
+// Initialize dependencies
 const userModels = new MongoLoader({ schemaExtension: 'user.schema.js' }).load()
 const roleModels = new MongoLoader({ schemaExtension: 'role.schema.js' }).load()
 
 const tokenManager = new TokenManager({ config, cache })
 
 const authManager = new AuthManager({
+  utils: { bcrypt, jwt },
   config,
   userModels,
   roleModels,
@@ -30,12 +39,23 @@ const authManager = new AuthManager({
 const authController = new AuthController({ authManager })
 const responseDispatcher = new ResponseDispatcher()
 
+/**
+ * @route POST /login
+ * @description Log in a user
+ * @middleware validateRequest, deviceMiddleware
+ */
 authRoutes.post(
   '/login',
   validateRequest(['identifier', 'password']),
   deviceMiddleware(),
   authController.login.bind(authController)
 )
+
+/**
+ * @route PUT /logout
+ * @description Log out a user
+ * @middleware queryMiddleware
+ */
 authRoutes.put(
   '/logout',
   queryMiddleware({ query: ['token'], managers: { responseDispatcher } }),

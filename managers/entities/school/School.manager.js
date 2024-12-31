@@ -1,4 +1,10 @@
 module.exports = class School {
+  /**
+   * @constructor
+   * @param {Object} options - Dependencies for the School class
+   * @param {Object} options.utils - Utility functions
+   * @param {Object} options.mongoModels - MongoDB models for schools
+   */
   constructor({ utils, mongoModels } = {}) {
     this.utils = utils
     this.mongoModels = mongoModels
@@ -12,7 +18,17 @@ module.exports = class School {
     ]
   }
 
-  // Create a new school
+  /**
+   * Creates a new school
+   * @param {string} name - Name of the school
+   * @param {string} address - Address of the school
+   * @param {string} phoneNumber - Phone number of the school
+   * @param {string} email - Email address of the school
+   * @param {string} website - Website URL of the school
+   * @param {Array<string>} administrators - List of administrator IDs
+   * @param {string} adminId - ID of the superadmin creating the school
+   * @returns {Object} Result of school creation
+   */
   async createSchool({
     name,
     address,
@@ -28,7 +44,6 @@ module.exports = class School {
       return { errors: 'School model is not loaded' }
     }
 
-    // // Check if the school already exists
     const fieldsToCheck = { name, phoneNumber, email, website }
     const validationError = await this.utils.validateUniqueFields(
       school,
@@ -40,12 +55,10 @@ module.exports = class School {
     }
 
     if (!Array.isArray(administrators)) {
-      // If administrators is not defined or not an array, initialize it as an empty array
       administrators = []
     }
 
     if (!administrators.includes(adminId)) {
-      // Add adminId to the administrators array if it doesn't already exist
       administrators.push(adminId)
     }
 
@@ -54,7 +67,6 @@ module.exports = class School {
       this.mongoModels.school
     )
 
-    // Create the school
     const newSchool = await school.create({
       name,
       address,
@@ -71,13 +83,17 @@ module.exports = class School {
     }
   }
 
-  // Get a list of all schools
+  /**
+   * Fetches a list of schools
+   * @param {string} adminId - ID of the administrator to filter schools
+   * @param {number} [page=1] - Page number for pagination
+   * @param {number} [limit=10] - Number of records per page
+   * @returns {Object} Result containing the list of schools
+   */
   async getSchools({ adminId, page = 1, limit = 10 }) {
-    // Calculate the number of documents to skip
     const skip = (page - 1) * limit
     const school = this.mongoModels.school
 
-    // Query schools with pagination and populate classrooms
     const schools = await school
       .find({
         administrators: { $in: [adminId] }
@@ -86,7 +102,6 @@ module.exports = class School {
       .skip(skip)
       .limit(limit)
 
-    // Count the total number of matching schools for pagination metadata
     const totalSchools = await school.countDocuments({
       administrators: { $in: [adminId] }
     })
@@ -107,7 +122,13 @@ module.exports = class School {
     }
   }
 
-  // Get a single school by ID
+  /**
+   * Fetches a school by its ID
+   * @param {Object} params - Parameters for fetching a school
+   * @param {string} params.schoolId - ID of the school to fetch
+   * @param {string} params.adminId - ID of the administrator accessing the school
+   * @returns {Object} Result containing the school details
+   */
   async getSchoolById({ schoolId, adminId }) {
     const school = await this.mongoModels.school
       .findOne({
@@ -129,16 +150,20 @@ module.exports = class School {
     }
   }
 
-  // Update a school
+  /**
+   * Updates a school
+   * @param {string} schoolId - ID of the school to update
+   * @param {Object} updates - Fields to update
+   * @param {string} superadminId - ID of the superadmin performing the update
+   * @returns {Object} Result of the update operation
+   */
   async updateSchool({ schoolId, updates, superadminId }) {
-    // Fetch the school document
     const school = await this.mongoModels.school.findById(schoolId)
 
     if (!school) {
       return { errors: 'School not found.' }
     }
 
-    // Check if superadminId is part of administrators
     if (!school.administrators.includes(superadminId)) {
       return {
         errors:
@@ -146,24 +171,20 @@ module.exports = class School {
       }
     }
 
-    // Handle administrators updates
     if (updates.administrators) {
       const { add = [], remove = [] } = updates.administrators
 
-      // Add administrators, ensuring no duplicates
       for (const adminId of add) {
         if (!school.administrators.includes(adminId)) {
           school.administrators.push(adminId)
         }
       }
 
-      // Remove administrators
       school.administrators = school.administrators.filter(
         (adminId) => !remove.includes(adminId.toString())
       )
     }
 
-    // Update other fields
     const updatableFields = [
       'name',
       'address',
@@ -177,10 +198,8 @@ module.exports = class School {
       }
     }
 
-    // Update the updatedAt field
     school.updatedAt = new Date()
 
-    // Save the updated school document
     const updatedSchool = await school.save()
 
     return {
@@ -190,18 +209,21 @@ module.exports = class School {
     }
   }
 
-  // Delete a school
+  /**
+   * Deletes a school
+   * @param {string} schoolId - ID of the school to delete
+   * @param {string} superadminId - ID of the superadmin performing the deletion
+   * @returns {Object} Result of the delete operation
+   */
   async deleteSchool({ schoolId, superadminId }) {
     const school = this.mongoModels.school
 
-    // Fetch the school document
     const isSchool = await school.findById(schoolId)
 
     if (!isSchool) {
       return { errors: 'School not found.' }
     }
 
-    // Check if the superadminId is in the administrators array
     if (!isSchool.administrators.includes(superadminId)) {
       return {
         errors:
@@ -209,7 +231,6 @@ module.exports = class School {
       }
     }
 
-    // Delete the school
     await school.findByIdAndDelete({ _id: schoolId })
 
     return {

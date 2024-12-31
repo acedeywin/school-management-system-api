@@ -1,8 +1,16 @@
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-
 module.exports = class Auth {
-  constructor({ config, managers, userModels, roleModels } = {}) {
+  /**
+   * @constructor
+   * @param {Object} options - Dependencies for the Auth class
+   * @param {Object} options.utils - Utility libraries like bcrypt and jwt
+   * @param {Object} options.config - Application configuration
+   * @param {Object} options.managers - Manager instances including token manager
+   * @param {Object} options.userModels - MongoDB models for users
+   * @param {Object} options.roleModels - MongoDB models for roles
+   */
+  constructor({ utils, config, managers, userModels, roleModels } = {}) {
+    this.bcrypt = utils.bcrypt
+    this.jwt = utils.jwt
     this.config = config
     this.userModels = userModels
     this.roleModels = roleModels
@@ -11,6 +19,14 @@ module.exports = class Auth {
     this.authExposed = ['login', 'logout']
   }
 
+  /**
+   * Logs in a user
+   * @param {Object} loginDetails - Login details
+   * @param {string} loginDetails.identifier - Email or username of the user
+   * @param {string} loginDetails.password - Password of the user
+   * @param {Object} loginDetails.deviceInfo - Information about the user's device
+   * @returns {Object} Result of the login operation
+   */
   async login({ identifier, password, deviceInfo }) {
     const user = this.userModels.user
     const roles = await this.roleModels.role
@@ -32,14 +48,14 @@ module.exports = class Auth {
     const { _id, username, email, role, password: hashedPassword } = isUser
 
     // Compare passwords
-    const isMatch = await bcrypt.compare(password, hashedPassword)
+    const isMatch = await this.bcrypt.compare(password, hashedPassword)
     if (!isMatch) {
       return { errors: error }
     }
 
     const { permission } = await roles.findOne({ _id: role })
 
-    // // Generate long token
+    // Generate long token
     const longToken = this.tokenManager.genLongToken({
       userId: _id,
       userKey: permission
@@ -60,13 +76,19 @@ module.exports = class Auth {
         email,
         role: permission
       },
-      tokens: shortToken
+      token: shortToken
     }
   }
 
+  /**
+   * Logs out a user
+   * @param {Object} logoutDetails - Logout details
+   * @param {string} logoutDetails.token - Token to be invalidated
+   * @returns {Object} Result of the logout operation
+   */
   async logout({ token }) {
     // Add the token to the blacklist
-    const decoded = jwt.decode(token)
+    const decoded = this.jwt.decode(token)
     if (!decoded) {
       return { errors: 'Invalid token' }
     }

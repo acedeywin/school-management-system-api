@@ -4,8 +4,8 @@
 class NotFoundError extends Error {
   constructor(message = 'Resource not found') {
     super(message)
-    this.status = 404 // HTTP status code for "Not Found"
-    this.name = 'NotFoundError' // Set the name of the error class
+    this.status = 404
+    this.name = 'NotFoundError'
   }
 }
 
@@ -15,8 +15,8 @@ class NotFoundError extends Error {
 class BadRequestError extends Error {
   constructor(message = 'Bad request') {
     super(message)
-    this.status = 400 // HTTP status code for "Bad Request"
-    this.name = 'BadRequestError' // Set the name of the error class
+    this.status = 400
+    this.name = 'BadRequestError'
   }
 }
 
@@ -26,8 +26,8 @@ class BadRequestError extends Error {
 class CustomError extends Error {
   constructor(message = 'An error occurred', status = 500) {
     super(message)
-    this.status = status // Assign the provided status code
-    this.name = 'CustomError' // Set the name of the error class
+    this.status = status
+    this.name = 'CustomError'
   }
 }
 

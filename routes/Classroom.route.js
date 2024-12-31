@@ -36,6 +36,11 @@ const classroomManager = new ClassroomManager({
 
 const classroomController = new ClassroomController({ classroomManager })
 
+/**
+ * @route POST /
+ * @description Create a new classroom
+ * @middleware validateRequest, authMiddleware, roleMiddleware, queryMiddleware
+ */
 classroomRoutes.post(
   '/',
   validateRequest(['name', 'capacity', 'resources']),
@@ -51,8 +56,13 @@ classroomRoutes.post(
   classroomController.createClassroom.bind(classroomController)
 )
 
+/**
+ * @route GET /classrooms
+ * @description Get classrooms for a school
+ * @middleware authMiddleware, roleMiddleware, queryMiddleware
+ */
 classroomRoutes.get(
-  '/',
+  '/classrooms',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
@@ -65,6 +75,11 @@ classroomRoutes.get(
   classroomController.getClassrooms.bind(classroomController)
 )
 
+/**
+ * @route GET /
+ * @description Get a classroom by ID
+ * @middleware authMiddleware, roleMiddleware, queryMiddleware
+ */
 classroomRoutes.get(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
@@ -79,16 +94,14 @@ classroomRoutes.get(
   classroomController.getClassroomById.bind(classroomController)
 )
 
+/**
+ * @route PUT /
+ * @description Update a classroom
+ * @middleware validateRequest, authMiddleware, roleMiddleware, queryMiddleware
+ */
 classroomRoutes.put(
   '/',
-  validateRequest([
-    'name',
-    'school',
-    'managedBy',
-    'students',
-    'capacity',
-    'resources'
-  ]),
+  validateRequest(['name', 'capacity', 'resources']),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
@@ -101,6 +114,11 @@ classroomRoutes.put(
   classroomController.updateClassroom.bind(classroomController)
 )
 
+/**
+ * @route DELETE /
+ * @description Delete a classroom
+ * @middleware authMiddleware, roleMiddleware, queryMiddleware
+ */
 classroomRoutes.delete(
   '/',
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
