@@ -66,7 +66,7 @@ npm run docker:build
 npm run docker:run
 ```
 
-- Note: If you have issues with running `npm run docker:run`, run the script `npm run remove:module` to remove the node_modules folder and package lock file. Then run `npm run docker:build` to build docker again.
+- Note: If you have issues with running `npm run docker:run`, run the script `npm run remove:module` to remove the `node_modules` folder and `package-lock` file. Then run `npm run docker:build` to build docker again.
 
 ### Deployment
 
@@ -93,7 +93,7 @@ This API provides functionalities for managing users, including creating, updati
 
 ## API Endpoints
 
-- BASE_URL= https://your-enpoint-url
+- BASE_URL= https://your-endpoint-url
 
 ### 1. **Create Superadmin**
 
