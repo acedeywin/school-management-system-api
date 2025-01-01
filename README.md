@@ -491,6 +491,7 @@ curl -X POST \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "Role model is not loaded"
   }
   ```
@@ -534,6 +535,7 @@ curl -X GET \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "Role not found"
   }
   ```
@@ -585,6 +587,7 @@ curl -X GET \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "Role not found"
   }
   ```
@@ -656,6 +659,7 @@ curl -X POST \
 - **Failure (401)**:
   ```json
   {
+    "success": false,
     "errors": "Invalid email or password."
   }
   ```
@@ -704,6 +708,7 @@ curl -X PUT \
 - **Failure (401)**:
   ```json
   {
+    "success": false,
     "errors": "Invalid token"
   }
   ```
@@ -794,6 +799,7 @@ curl -X POST \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "Validation error details"
   }
   ```
@@ -851,6 +857,7 @@ curl -X GET \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "No school found for the given admin ID"
   }
   ```
@@ -903,6 +910,7 @@ curl -X GET \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "School not found or you do not have access to this school"
   }
   ```
@@ -977,6 +985,7 @@ curl -X PUT \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "Unauthorized. You are not an authorized administrator of this school."
   }
   ```
@@ -1028,6 +1037,7 @@ curl -X DELETE \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "Unauthorized. Only authorized administrators can delete this school."
   }
   ```
@@ -1106,6 +1116,7 @@ curl -X POST \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "Validation error details"
   }
   ```
@@ -1167,6 +1178,7 @@ curl -X GET \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "No classrooms found for the given school ID"
   }
   ```
@@ -1221,6 +1233,7 @@ curl -X GET \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "Classroom not found or you do not have access to this classroom"
   }
   ```
@@ -1292,6 +1305,7 @@ curl -X PUT \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "Unauthorized or invalid data provided"
   }
   ```
@@ -1343,6 +1357,7 @@ curl -X DELETE \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "Unauthorized or invalid classroom ID provided"
   }
   ```
@@ -1427,6 +1442,7 @@ curl -X POST \
 
 ```json
 {
+  "success": false,
   "errors": "Validation error details"
 }
 ```
@@ -1505,6 +1521,7 @@ curl -X PUT \
 
 ```json
 {
+  "success": false,
   "errors": "Invalid transfer details"
 }
 ```
@@ -1563,6 +1580,7 @@ curl -X GET \
 
 ```json
 {
+  "success": false,
   "errors": "No students found"
 }
 ```
@@ -1614,6 +1632,7 @@ curl -X GET \
 
 ```json
 {
+  "success": false,
   "errors": "Student not found"
 }
 ```
@@ -1685,6 +1704,7 @@ curl -X PUT \
 
 ```json
 {
+  "success": false,
   "errors": "Unauthorized or invalid data provided"
 }
 ```
@@ -1736,6 +1756,7 @@ curl -X DELETE \
 - **Failure (400)**:
   ```json
   {
+    "success": false,
     "errors": "Unauthorized or invalid student ID."
   }
   ```
