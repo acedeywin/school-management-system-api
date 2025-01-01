@@ -1,6 +1,6 @@
 # School Management System API
 
-This project is a backend API for a School Management System (SMS). It includes features such as administrator, schools, and classes management, as well as students enrollment.
+This project is a backend API for a School Management System (SMS). It includes features such as administrator, schools, and classrooms management, as well as students enrollment.
 
 ## User Management API Documentation
 
@@ -19,9 +19,22 @@ This API provides functionalities for managing users, including creating, updati
 2. Configure environment variables in the `.env` file:
 
    ```env
-   CACHE_PREFIX=your-cache-prefix
-   CACHE_REDIS=redis-url
-   ...
+   SERVICE_NAME=your-service-name
+   ENV=your-env
+   CORTEX_REDIS=your-redis-cortex-url
+   CORTEX_PREFIX=your-cortex-prefix
+   CORTEX_TYPE=your-cortex-type
+   OYSTER_REDIS=your-oyster-redis-url
+   OYSTER_PREFIX=your-oyster-redis-prefix
+   CACHE_REDIS=your-redis-cache-url
+   CACHE_PREFIX=your-redis-cache-prefix
+   MONGO_URI=your-mongo-uri
+   USER_PORT=user-port
+   ADMIN_PORT=admin-port
+   ADMIN_URL=admin-url
+   LONG_TOKEN_SECRET=your-long-token
+   SHORT_TOKEN_SECRET=your-short-token
+   NACL_SECRET=your-nacl-secret
    ```
 
 3. Start the server:
@@ -1682,3 +1695,88 @@ curl -X DELETE \
     "errors": "Unauthorized or invalid student ID."
   }
   ```
+
+# Database Schema Design for School Management System
+
+## Design Decisions
+
+- **Database Schema**: Separate collections for roles, schools, classrooms, and students to enhance data organization, scalability, and access efficiency.
+- **MongoDB for NoSQL Design**: Chose MongoDB for its flexibility in handling hierarchical data and relationships, which is well-suited for the dynamic nature of schools, classrooms, and students.
+- **Entity Relationships**: Established clear relationships between entities using `ObjectId` references to maintain referential integrity.
+- **Schema Validation**: Enforced data validation rules at the schema level for consistent and accurate data entry.
+
+---
+
+## Collections
+
+### 1. **Roles**
+Stores role-specific information, enabling role-based access control (RBAC).
+
+```plaintext
+| Field Name   | Data Type | Constraints                                            | Description                 |
+|--------------|-----------|-------------------------------------------------------|-----------------------------|
+| `permission` | String    | Required, Enum(`superadmin`, `schooladmin`), Unique   | Role type for authorization |
+| `createdAt`  | Date      | Default: `Date.now`                                   | Record creation timestamp   |
+| `updatedAt`  | Date      | Default: `Date.now`                                   | Record update timestamp     |
+```
+---
+
+### 2. **Schools**
+Represents a school entity, linking administrators and classrooms.
+
+```plaintext
+| Field Name      | Data Type         | Constraints                  | Description                          |
+|------------------|------------------|------------------------------|--------------------------------------|
+| `name`          | String           | Required, Unique             | Name of the school                   |
+| `address`       | String           | Required                     | Physical address of the school       |
+| `phoneNumber`   | String           | Required, Unique             | School contact number                |
+| `email`         | String           | Required, Unique             | School contact email                 |
+| `website`       | String           | Unique                       | School website (if any)              |
+| `administrators`| Array(ObjectId)  | Ref: `User`, Required        | Administrators for the school        |
+| `classrooms`    | Array(ObjectId)  | Ref: `Classroom`             | List of classrooms in the school     |
+| `createdAt`     | Date             | Default: `Date.now`          | Record creation timestamp            |
+| `updatedAt`     | Date             | Default: `Date.now`          | Record update timestamp              |
+```
+---
+
+### 3. **Classrooms**
+Represents a classroom within a school.
+
+```plaintext
+| Field Name      | Data Type         | Constraints                  | Description                          |
+|------------------|------------------|------------------------------|--------------------------------------|
+| `name`          | String           | Required                     | Classroom name                       |
+| `school`        | ObjectId         | Ref: `School`, Required      | Associated school                    |
+| `managedBy`     | ObjectId         | Ref: `User`, Required        | Administrator managing the classroom |
+| `students`      | Array(ObjectId)  | Ref: `Student`               | List of students in the classroom    |
+| `capacity`      | Number           | Required                     | Maximum number of students           |
+| `resources`     | Array(String)    |                              | Resources available in the classroom |
+| `createdAt`     | Date             | Default: `Date.now`          | Record creation timestamp            |
+| `updatedAt`     | Date             | Default: `Date.now`          | Record update timestamp              |
+```
+---
+
+### 4. **Students**
+Represents a student enrolled in a school and classroom.
+
+```plaintext
+| Field Name      | Data Type         | Constraints                  | Description                          |
+|------------------|------------------|------------------------------|--------------------------------------|
+| `firstName`     | String           | Required                     | Student's first name                 |
+| `lastName`      | String           | Required                     | Student's last name                  |
+| `email`         | String           | Required, Unique             | Student's email address              |
+| `phoneNumber`   | String           |                              | Student's contact number             |
+| `dateOfBirth`   | Date             |                              | Student's date of birth              |
+| `school`        | ObjectId         | Ref: `School`, Required      | Associated school                    |
+| `classroom`     | ObjectId         | Ref: `Classroom`             | Associated classroom                 |
+| `transferHistory`| Array(Object)   |                              | History of school transfers          |
+| `createdAt`     | Date             | Default: `Date.now`          | Record creation timestamp            |
+| `updatedAt`     | Date             | Default: `Date.now`          | Record update timestamp              |
+```
+---
+
+## Entity-Relationship Diagram
+
+The following E-R diagram illustrates the database structure for this project, showing relationships between `Roles`, `Schools`, `Classrooms`, and `Students`.
+
+![E-R Diagram](E-R-diagram.png)

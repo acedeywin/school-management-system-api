@@ -15,6 +15,3 @@ const SchoolSchema = new mongoose.Schema({
 })
 
 module.exports = mongoose.model('School', SchoolSchema)
-
-// Once superadmin creates a school, the superadmin will an administrator
-// and also add a school admin too.
