@@ -5,7 +5,8 @@ const ClassroomManager = require('../managers/entities/classroom/Classroom.manag
 const ClassroomController = require('../controllers/Classroom.controller')
 const ResponseDispatcher = require('../managers/response_dispatcher/ResponseDispatcher.manager')
 const config = require('../config/index.config')
-const { validateRequest } = require('../mws/Middleware.manager')
+const validateRequest = require('../mws/__validateRequest.mw')
+const { validateSchema } = require('../managers/_common/schema.validators')
 const utils = require('../libs/utils')
 const authMiddleware = require('../mws/__token.mw')
 const roleMiddleware = require('../mws/__role.mw')
@@ -43,7 +44,10 @@ const classroomController = new ClassroomController({ classroomManager })
  */
 classroomRoutes.post(
   '/',
-  validateRequest(['name', 'capacity', 'resources']),
+  validateRequest({
+    managers: { responseDispatcher, validateSchema },
+    schemaKeys: ['name', 'capacity', 'resources']
+  }),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
@@ -101,7 +105,10 @@ classroomRoutes.get(
  */
 classroomRoutes.put(
   '/',
-  validateRequest(['name', 'capacity', 'resources']),
+  validateRequest({
+    managers: { responseDispatcher, validateSchema },
+    schemaKeys: ['name', 'capacity', 'resources']
+  }),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },

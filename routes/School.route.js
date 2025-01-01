@@ -5,7 +5,8 @@ const SchoolController = require('../controllers/School.controller')
 const TokenManager = require('../managers/token/Token.manager')
 const ResponseDispatcher = require('../managers/response_dispatcher/ResponseDispatcher.manager')
 const config = require('../config/index.config')
-const { validateRequest } = require('../mws/Middleware.manager')
+const validateRequest = require('../mws/__validateRequest.mw')
+const { validateSchema } = require('../managers/_common/schema.validators')
 const authMiddleware = require('../mws/__token.mw')
 const queryMiddleware = require('../mws/__query.mw')
 const roleMiddleware = require('../mws/__role.mw')
@@ -46,14 +47,17 @@ const schoolController = new SchoolController({ schoolManager })
  */
 schoolRoutes.post(
   '/create-school',
-  validateRequest([
-    'name',
-    'address',
-    'phoneNumber',
-    'email',
-    'website',
-    'administrators'
-  ]),
+  validateRequest({
+    managers: { responseDispatcher, validateSchema },
+    schemaKeys: [
+      'name',
+      'address',
+      'phoneNumber',
+      'email',
+      'website',
+      'administrators'
+    ]
+  }),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
@@ -105,15 +109,18 @@ schoolRoutes.get(
  */
 schoolRoutes.put(
   '/',
-  validateRequest([
-    'name',
-    'address',
-    'phoneNumber',
-    'email',
-    'website',
-    'administrators',
-    'classrooms'
-  ]),
+  validateRequest({
+    managers: { responseDispatcher, validateSchema },
+    schemaKeys: [
+      'name',
+      'address',
+      'phoneNumber',
+      'email',
+      'website',
+      'administrators',
+      'classrooms'
+    ]
+  }),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   queryMiddleware({ query: ['schoolId'], managers: { responseDispatcher } }),
   roleMiddleware({

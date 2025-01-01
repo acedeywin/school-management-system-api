@@ -11,7 +11,8 @@ const TokenManager = require('../managers/token/Token.manager')
 const AuthManager = require('../managers/entities/auth/Auth.manager')
 const AuthController = require('../controllers/Auth.controller')
 const config = require('../config/index.config')
-const { validateRequest } = require('../mws/Middleware.manager')
+const validateRequest = require('../mws/__validateRequest.mw')
+const { validateSchema } = require('../managers/_common/schema.validators')
 const deviceMiddleware = require('../mws/__device.mw')
 const queryMiddleware = require('../mws/__query.mw')
 const ResponseDispatcher = require('../managers/response_dispatcher/ResponseDispatcher.manager')
@@ -46,7 +47,10 @@ const responseDispatcher = new ResponseDispatcher()
  */
 authRoutes.post(
   '/login',
-  validateRequest(['identifier', 'password']),
+  validateRequest({
+    managers: { responseDispatcher, validateSchema },
+    schemaKeys: ['identifier', 'password']
+  }),
   deviceMiddleware(),
   authController.login.bind(authController)
 )

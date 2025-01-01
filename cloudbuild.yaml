@@ -2,20 +2,11 @@ steps:
   # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args:
-      [
-        'build',
-        '-t',
-        'gcr.io/crested-photon-438721-m2/school-mgt-system-api',
-        '.'
-      ]
+      ['build', '-t', 'gcr.io/add-your-project-id/school-mgt-system-api', '.']
 
   # Step 2: Push the Docker image to Google Container Registry (optional if not already pushed)
   - name: 'gcr.io/cloud-builders/docker'
-    args:
-      [
-        'push',
-        'gcr.io/crested-photon-438721-m2/school-mgt-system-api'
-      ]
+    args: ['push', 'gcr.io/add-your-project-id/school-mgt-system-api']
 
   # Step 3: Deploy to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -25,7 +16,7 @@ steps:
         'deploy',
         'school-mgt-system-api',
         '--image',
-        'gcr.io/crested-photon-438721-m2/school-mgt-system-api',
+        'gcr.io/add-your-project-id/school-mgt-system-api',
         '--platform',
         'managed',
         '--region',
@@ -34,4 +25,4 @@ steps:
       ]
 
 images:
-  - 'gcr.io/crested-photon-438721-m2/school-mgt-system-api'
+  - 'gcr.io/add-your-project-id/school-mgt-system-api'

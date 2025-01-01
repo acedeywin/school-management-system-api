@@ -9,7 +9,8 @@ const roleMiddleware = require('../mws/__role.mw')
 const queryMiddleware = require('../mws/__query.mw')
 const enrollMiddleware = require('../mws/__enroll.mw')
 const transferMiddleware = require('../mws/__transfer.mw')
-const { validateRequest } = require('../mws/Middleware.manager')
+const validateRequest = require('../mws/__validateRequest.mw')
+const { validateSchema } = require('../managers/_common/schema.validators')
 const utils = require('../libs/utils')
 const config = require('../config/index.config')
 const cache = require('../cache/cache.dbh')({
@@ -55,13 +56,10 @@ const studentController = new StudentController({ studentManager })
  */
 studentRoutes.post(
   '/enroll',
-  validateRequest([
-    'firstName',
-    'lastName',
-    'email',
-    'phoneNumber',
-    'dateOfBirth'
-  ]),
+  validateRequest({
+    managers: { responseDispatcher, validateSchema },
+    schemaKeys: ['firstName', 'lastName', 'email', 'phoneNumber', 'dateOfBirth']
+  }),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
@@ -89,7 +87,10 @@ studentRoutes.post(
  */
 studentRoutes.put(
   '/transfer',
-  validateRequest(['transferHistory']),
+  validateRequest({
+    managers: { responseDispatcher, validateSchema },
+    schemaKeys: ['transferHistory']
+  }),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
@@ -157,13 +158,10 @@ studentRoutes.get(
  */
 studentRoutes.put(
   '/',
-  validateRequest([
-    'firstName',
-    'lastName',
-    'email',
-    'phoneNumber',
-    'dateOfBirth'
-  ]),
+  validateRequest({
+    managers: { responseDispatcher, validateSchema },
+    schemaKeys: ['firstName', 'lastName', 'email', 'phoneNumber', 'dateOfBirth']
+  }),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },

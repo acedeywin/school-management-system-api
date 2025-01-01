@@ -12,39 +12,39 @@ This API provides functionalities for managing users, including creating, updati
 
 - Configure environment variables in the `.env` file:
 
-   ```env
-   SERVICE_NAME=your-service-name
-   ENV=your-env
-   CORTEX_REDIS=your-redis-cortex-url
-   CORTEX_PREFIX=your-cortex-prefix
-   CORTEX_TYPE=your-cortex-type
-   REDIS_URI=your-redis-uri
-   OYSTER_REDIS=your-oyster-redis-url
-   OYSTER_PREFIX=your-oyster-redis-prefix
-   CACHE_REDIS=your-redis-cache-url
-   CACHE_PREFIX=your-redis-cache-prefix
-   MONGO_URI=your-mongo-uri
-   USER_PORT=user-port
-   ADMIN_PORT=admin-port
-   ADMIN_URL=admin-url
-   LONG_TOKEN_SECRET=your-long-token
-   SHORT_TOKEN_SECRET=your-short-token
-   NACL_SECRET=your-nacl-secret
-   ```
+  ```env
+  SERVICE_NAME=your-service-name
+  ENV=your-env
+  CORTEX_REDIS=your-redis-cortex-url
+  CORTEX_PREFIX=your-cortex-prefix
+  CORTEX_TYPE=your-cortex-type
+  REDIS_URI=your-redis-uri
+  OYSTER_REDIS=your-oyster-redis-url
+  OYSTER_PREFIX=your-oyster-redis-prefix
+  CACHE_REDIS=your-redis-cache-url
+  CACHE_PREFIX=your-redis-cache-prefix
+  MONGO_URI=your-mongo-uri
+  USER_PORT=user-port
+  ADMIN_PORT=admin-port
+  ADMIN_URL=admin-url
+  LONG_TOKEN_SECRET=your-long-token
+  SHORT_TOKEN_SECRET=your-short-token
+  NACL_SECRET=your-nacl-secret
+  ```
 
--   **Installation**
+- **Installation**
 
 ```bash
 npm install
 ```
 
--   **Development Mode:**
+- **Development Mode:**
 
 ```bash
 npm run dev
 ```
 
--   **Production Mode:**
+- **Production Mode:**
 
 ```bash
 npm run start
@@ -52,14 +52,34 @@ npm run start
 
 ### Docker:
 
--   **Build the image:**
+- **Build the image:**
+
 ```bash
 npm run docker:build
 ```
--   **Run the container:**
+
+- **Run the container:**
+
 ```bash
 npm run docker:run
 ```
+
+- Note: If you have issues with running `npm run docker:run`, run the script `npm run remove:module` to remove the node_modules folder and package lock file. Then run `npm run docker:build` to build docker again.
+
+### Deployment
+
+- **Deploy to Google Cloud Run**
+
+- Install Google Cloud CLI
+- Login and authenticate your user account
+- Create a project on Google Cloud
+- configure the `cloudbuild.yaml` file to match your credentials (Google Cloud project ID).
+- Run `npm run gcp:docker:build` to build the docker file on Cloud Run
+- Goto Cloud Run:
+- 1. Click `Deploy Container` and select `Service`
+- 2. Select `Deploy one revision from an existing container image`
+- 3. Select the container image URL that you built previously
+- 4. Select and fill the necessary options and click on `Create` to deploy your service.
 
 ### Testing the API
 
@@ -67,7 +87,7 @@ Use tools like Postman or Curl to test the API. Ensure to include authentication
 
 ## User API Endpoints
 
-- BASE_URL = http://localhost:3000
+- BASE_URL= https://your-enpoint-url
 
 ### 1. **Create Superadmin**
 

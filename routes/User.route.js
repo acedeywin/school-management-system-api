@@ -6,7 +6,8 @@ const UserManager = require('../managers/entities/user/User.manager')
 const UserController = require('../controllers/User.controller')
 const ResponseDispatcher = require('../managers/response_dispatcher/ResponseDispatcher.manager')
 const config = require('../config/index.config')
-const { validateRequest } = require('../mws/Middleware.manager')
+const validateRequest = require('../mws/__validateRequest.mw')
+const { validateSchema } = require('../managers/_common/schema.validators')
 const utils = require('../libs/utils')
 const authMiddleware = require('../mws/__token.mw')
 const roleMiddleware = require('../mws/__role.mw')
@@ -43,7 +44,10 @@ const userController = new UserController({ userManager })
  */
 userRoutes.post(
   '/create-user',
-  validateRequest(['username', 'email', 'password', 'role']),
+  validateRequest({
+    managers: { responseDispatcher, validateSchema },
+    schemaKeys: ['username', 'email', 'password', 'role']
+  }),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
@@ -59,7 +63,10 @@ userRoutes.post(
  */
 userRoutes.post(
   '/superadmin',
-  validateRequest(['username', 'email', 'password']),
+  validateRequest({
+    managers: { responseDispatcher, validateSchema },
+    schemaKeys: ['username', 'email', 'password']
+  }),
   userController.createSuperadmin.bind(userController)
 )
 
@@ -104,7 +111,10 @@ userRoutes.get(
  */
 userRoutes.put(
   '/',
-  validateRequest(['username', 'email', 'password', 'role', 'schools']),
+  validateRequest({
+    managers: { responseDispatcher, validateSchema },
+    schemaKeys: ['username', 'email', 'password', 'role', 'schools']
+  }),
   authMiddleware({ managers: { responseDispatcher, token: tokenManager } }),
   roleMiddleware({
     managers: { responseDispatcher },
