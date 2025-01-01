@@ -7,15 +7,16 @@
  * @throws {BadRequestError} If the data fails validation against the schema rules.
  * @returns {Object} An object indicating validation success: { valid: true }.
  */
+const { BadRequestError, NotFoundError } = require('../../libs/errors')
+const schema = require('./schema.models')
+
 const validateSchema = (data, schemaKey) => {
-  // Retrieve validation rules for the specified schemaKey
   const rules = schema[schemaKey]
 
   if (!rules) {
     throw new NotFoundError(`No validation rules defined for ${schemaKey}`)
   }
 
-  // Retrieve the value to validate based on the schema's path
   const value =
     typeof rules.path === 'string'
       ? data[rules.path]?.trim?.() || data[rules.path]
@@ -29,7 +30,7 @@ const validateSchema = (data, schemaKey) => {
     throw new BadRequestError(`${rules.path} should be of type ${rules.type}`)
   }
 
-  // Validate capacity rule (specific to "capacity" schemaKey)
+  // Validate if capacity should be greater than zero
   if (schemaKey === 'capacity' && typeof value === 'number' && value <= 0) {
     throw new BadRequestError(`${rules.path} should be greater than zero`)
   }
@@ -45,9 +46,7 @@ const validateSchema = (data, schemaKey) => {
 
     if (valueLength < rules.length.min || valueLength > rules.length.max) {
       throw new BadRequestError(
-        `${rules.path} should be between ${rules.length.min} and ${rules.length.max} ${
-          actualType === 'object' ? 'keys' : 'characters'
-        }`
+        `${rules.path} should be between ${rules.length.min} and ${rules.length.max} ${actualType === 'object' ? 'keys' : 'characters'}`
       )
     }
   }
@@ -59,7 +58,7 @@ const validateSchema = (data, schemaKey) => {
     )
   }
 
-  // Validate against custom rules
+  // Validate custom rules
   if (rules.rules) {
     const errors = rules.rules
       .filter((rule) => !rule.regex.test(value))
