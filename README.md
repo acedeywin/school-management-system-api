@@ -2,10 +2,6 @@
 
 This project is a backend API for a School Management System (SMS). It includes features such as administrator, schools, and classrooms management, as well as students enrollment.
 
-## User Management API Documentation
-
-This API provides functionalities for managing users, including creating, updating, retrieving, and deleting user profiles. It uses an Express.js framework and integrates with a `UserManager` service for the business logic.
-
 ## How to Use the API
 
 ### Setup
@@ -50,6 +46,12 @@ npm run dev
 npm run start
 ```
 
+- **Unit Test:**
+
+```bash
+npm run test
+```
+
 ### Docker:
 
 - **Build the image:**
@@ -85,7 +87,11 @@ npm run docker:run
 
 Use tools like Postman or Curl to test the API. Ensure to include authentication tokens and necessary parameters in the requests.
 
-## User API Endpoints
+## User Management API Documentation
+
+This API provides functionalities for managing users, including creating, updating, retrieving, and deleting user profiles. It uses an Express.js framework and integrates with a `UserManager` service for the business logic.
+
+## API Endpoints
 
 - BASE_URL= https://your-enpoint-url
 
@@ -467,7 +473,7 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   -d '{
-    "permission": "schooladmin",
+    "permission": "superadmin",
   }'\
   BASE_URL/api/v1/role/create-role
 ```
@@ -620,7 +626,6 @@ Authenticates a user by validating credentials and generates tokens for subseque
 | ------------ | ------ | -------- | ----------------------------------- |
 | `identifier` | String | Yes      | Email or username of the user       |
 | `password`   | String | Yes      | User's password                     |
-| `deviceInfo` | Object | No       | Information about the user's device |
 ```
 
 ## Example Request
