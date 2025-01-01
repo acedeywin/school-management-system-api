@@ -9,7 +9,12 @@
     "dev": "nodemon index.js",
     "format": "prettier --write .",
     "lint": "eslint . ",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "remove:module": "rm -rf node_modules package-lock.json",
+    "docker:build": "docker build -t school-mgt-system-api .",
+    "docker:run": "docker run -p 5111:5111 school-mgt-system-api",
+    "docker:stop": "docker stop school-mgt-system-api",
+    "gcp:docker:build": "gcloud builds submit --config cloudbuild.yaml"
   },
   "author": "",
   "license": "ISC",

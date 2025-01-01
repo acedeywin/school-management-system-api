@@ -10,13 +10,7 @@ This API provides functionalities for managing users, including creating, updati
 
 ### Setup
 
-1. Clone the repository and install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-2. Configure environment variables in the `.env` file:
+- Configure environment variables in the `.env` file:
 
    ```env
    SERVICE_NAME=your-service-name
@@ -24,6 +18,7 @@ This API provides functionalities for managing users, including creating, updati
    CORTEX_REDIS=your-redis-cortex-url
    CORTEX_PREFIX=your-cortex-prefix
    CORTEX_TYPE=your-cortex-type
+   REDIS_URI=your-redis-uri
    OYSTER_REDIS=your-oyster-redis-url
    OYSTER_PREFIX=your-oyster-redis-prefix
    CACHE_REDIS=your-redis-cache-url
@@ -37,10 +32,34 @@ This API provides functionalities for managing users, including creating, updati
    NACL_SECRET=your-nacl-secret
    ```
 
-3. Start the server:
-   ```bash
-   npm start
-   ```
+-   **Installation**
+
+```bash
+npm install
+```
+
+-   **Development Mode:**
+
+```bash
+npm run dev
+```
+
+-   **Production Mode:**
+
+```bash
+npm run start
+```
+
+### Docker:
+
+-   **Build the image:**
+```bash
+npm run docker:build
+```
+-   **Run the container:**
+```bash
+npm run docker:run
+```
 
 ### Testing the API
 
@@ -1710,6 +1729,7 @@ curl -X DELETE \
 ## Collections
 
 ### 1. **Roles**
+
 Stores role-specific information, enabling role-based access control (RBAC).
 
 ```plaintext
@@ -1719,9 +1739,11 @@ Stores role-specific information, enabling role-based access control (RBAC).
 | `createdAt`  | Date      | Default: `Date.now`                                   | Record creation timestamp   |
 | `updatedAt`  | Date      | Default: `Date.now`                                   | Record update timestamp     |
 ```
+
 ---
 
 ### 2. **Schools**
+
 Represents a school entity, linking administrators and classrooms.
 
 ```plaintext
@@ -1737,9 +1759,11 @@ Represents a school entity, linking administrators and classrooms.
 | `createdAt`     | Date             | Default: `Date.now`          | Record creation timestamp            |
 | `updatedAt`     | Date             | Default: `Date.now`          | Record update timestamp              |
 ```
+
 ---
 
 ### 3. **Classrooms**
+
 Represents a classroom within a school.
 
 ```plaintext
@@ -1754,9 +1778,11 @@ Represents a classroom within a school.
 | `createdAt`     | Date             | Default: `Date.now`          | Record creation timestamp            |
 | `updatedAt`     | Date             | Default: `Date.now`          | Record update timestamp              |
 ```
+
 ---
 
 ### 4. **Students**
+
 Represents a student enrolled in a school and classroom.
 
 ```plaintext
@@ -1773,6 +1799,7 @@ Represents a student enrolled in a school and classroom.
 | `createdAt`     | Date             | Default: `Date.now`          | Record creation timestamp            |
 | `updatedAt`     | Date             | Default: `Date.now`          | Record update timestamp              |
 ```
+
 ---
 
 ## Entity-Relationship Diagram

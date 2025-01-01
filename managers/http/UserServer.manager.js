@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const http = require('http')
 const express = require('express')
 const cors = require('cors')
@@ -32,8 +33,15 @@ module.exports = class UserServer {
     //Expose routes
     app.use('/api/v1', routes)
 
+    // / Software accessibility test
+    app.get('/', (req, res) => {
+      return res
+        .status(200)
+        .json({ message: 'Welcome to School Management System!' })
+    })
+
     /** an error handler */
-    app.use((err, req, res) => {
+    app.use((err, req, res, next) => {
       console.error(err.stack)
       res.status(500).send('Something broke!')
     })
